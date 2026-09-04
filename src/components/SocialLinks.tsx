@@ -2,6 +2,7 @@
 
 import React from "react";
 import { profileConfig, PortLink } from "@/config/profile";
+import { sound } from "@/lib/sound";
 
 function GitHubIcon({ className }: { className?: string }) {
   return (
@@ -47,64 +48,84 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   mail: MailIcon,
 };
 
+const hotkeyMap: Record<string, string> = {
+  github: "G",
+  telegram: "T",
+  facebook: "F",
+  email: "E",
+};
+
 export function SocialLinks() {
   const { portLinks } = profileConfig;
 
+  const handleClick = () => {
+    sound.playMechanicalClick();
+  };
+
   return (
-    <div className="w-full mb-6">
+    <div className="w-full p-4 flex flex-col justify-between font-mono h-full">
       {/* Section Machine Label */}
-      <div className="flex items-center justify-between border-b border-chassis-border pb-2 mb-2 text-[10px] font-mono text-industrial-zinc">
-        <span className="font-bold tracking-wider uppercase flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 bg-chassis-border inline-block" />
-          COMMUNICATION INTERCONNECTS // PATCHBAY
-        </span>
-        <span>4 ACTIVE PORTS</span>
-      </div>
+      <div>
+        <div className="flex items-center justify-between border-b border-chassis-border/80 pb-2 mb-2.5 text-[10px] text-industrial-zinc">
+          <span className="font-bold tracking-wider uppercase flex items-center gap-1.5 text-industrial-paper">
+            <span className="w-1.5 h-1.5 bg-chassis-border inline-block" />
+            COMMUNICATION INTERCONNECTS // PATCHBAY
+          </span>
+          <span>4 ACTIVE PORTS</span>
+        </div>
 
-      {/* Port Rows */}
-      <div className="space-y-1.5">
-        {portLinks.map((port: PortLink) => {
-          const Icon = iconMap[port.icon] || MailIcon;
+        {/* Port Rows */}
+        <div className="space-y-1.5">
+          {portLinks.map((port: PortLink) => {
+            const Icon = iconMap[port.icon] || MailIcon;
+            const hotkey = hotkeyMap[port.id];
 
-          return (
-            <a
-              key={port.id}
-              href={port.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-tactile group flex items-center justify-between p-3 rounded bg-chassis-module border border-chassis-border hover:border-chassis-highlight text-left transition-all"
-            >
-              <div className="flex items-center gap-3">
-                {/* Port Number indicator */}
-                <span className="font-mono text-xs font-bold text-industrial-zinc group-hover:text-industrial-orange transition-colors">
-                  [{port.portNumber}]
-                </span>
+            return (
+              <a
+                key={port.id}
+                href={port.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleClick}
+                className="btn-tactile group flex items-center justify-between p-2.5 rounded bg-chassis-module border border-chassis-border hover:border-chassis-highlight text-left transition-all"
+              >
+                <div className="flex items-center gap-2.5">
+                  {/* Port Number indicator */}
+                  <span className="font-mono text-xs font-bold text-industrial-zinc group-hover:text-industrial-orange transition-colors">
+                    [{port.portNumber}]
+                  </span>
 
-                <div className="p-1.5 rounded bg-chassis-inset border border-chassis-border/80 text-industrial-paper group-hover:text-industrial-orange transition-colors">
-                  <Icon className="w-4 h-4" />
+                  <div className="p-1.5 rounded bg-chassis-inset border border-chassis-border/80 text-industrial-paper group-hover:text-industrial-orange transition-colors">
+                    <Icon className="w-3.5 h-3.5" />
+                  </div>
+
+                  <div>
+                    <div className="text-xs font-mono font-bold text-industrial-paper group-hover:text-white transition-colors">
+                      {port.label}
+                    </div>
+                    <div className="text-[10px] font-mono text-industrial-zinc">
+                      {port.targetHandle}
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <div className="text-xs font-mono font-bold text-industrial-paper group-hover:text-white transition-colors">
-                    {port.label}
-                  </div>
-                  <div className="text-[10px] font-mono text-industrial-zinc">
-                    {port.targetHandle}
-                  </div>
+                <div className="flex items-center gap-2">
+                  <span className="hidden sm:inline-block text-[8px] font-mono text-industrial-zinc px-1.5 py-0.5 rounded bg-chassis-inset border border-chassis-border/60">
+                    {port.protocol}
+                  </span>
+                  {hotkey && (
+                    <kbd className="text-[9px] bg-chassis-inset px-1 py-0.2 rounded border border-chassis-border text-industrial-zinc group-hover:text-industrial-orange">
+                      {hotkey}
+                    </kbd>
+                  )}
+                  <span className="text-xs font-mono text-chassis-border group-hover:text-industrial-orange group-hover:translate-x-0.5 transition-all">
+                    →
+                  </span>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:inline-block text-[9px] font-mono text-industrial-zinc px-1.5 py-0.5 rounded bg-chassis-inset border border-chassis-border/60">
-                  {port.protocol}
-                </span>
-                <span className="text-xs font-mono text-chassis-border group-hover:text-industrial-orange transition-colors">
-                  →
-                </span>
-              </div>
-            </a>
-          );
-        })}
+              </a>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

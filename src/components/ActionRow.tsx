@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import confetti from "canvas-confetti";
 import { profileConfig } from "@/config/profile";
+import { sound } from "@/lib/sound";
 
 interface ActionRowProps {
   onOpenQR: () => void;
@@ -12,6 +14,16 @@ export function ActionRow({ onOpenQR, onNotify }: ActionRowProps) {
   const [copiedEmail, setCopiedEmail] = useState(false);
 
   const handleDownloadVCard = () => {
+    sound.playSuccessChime();
+
+    // Trigger celebratory particle confetti
+    confetti({
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.7 },
+      colors: ["#FF4F00", "#22C55E", "#EDEDED"],
+    });
+
     const { vCard } = profileConfig;
     const vcfLines = [
       "BEGIN:VCARD",
@@ -40,6 +52,7 @@ export function ActionRow({ onOpenQR, onNotify }: ActionRowProps) {
   };
 
   const handleCopyEmail = async () => {
+    sound.playSuccessChime();
     try {
       await navigator.clipboard.writeText(profileConfig.email);
       setCopiedEmail(true);
@@ -50,41 +63,56 @@ export function ActionRow({ onOpenQR, onNotify }: ActionRowProps) {
     }
   };
 
+  const handleOpenQR = () => {
+    sound.playMechanicalClick();
+    onOpenQR();
+  };
+
   return (
-    <div className="grid grid-cols-3 gap-2 w-full mb-6">
+    <div className="grid grid-cols-3 gap-2 w-full font-mono">
       {/* Save Contact (.vcf) */}
       <button
         onClick={handleDownloadVCard}
-        className="btn-tactile flex flex-col items-center justify-center py-3 px-2 rounded bg-chassis-module border border-chassis-border text-industrial-paper text-center group cursor-pointer"
+        className="btn-tactile flex flex-col items-center justify-center py-3 px-2 rounded bg-chassis-module border border-chassis-border text-industrial-paper text-center group cursor-pointer relative"
       >
         <span className="text-[10px] font-mono text-industrial-orange mb-1 tracking-wider uppercase font-bold flex items-center gap-1">
           <span className="w-1.5 h-1.5 bg-industrial-orange rounded-none inline-block" />
           KEY // 01
         </span>
-        <span className="text-xs font-mono font-semibold tracking-wide">
+        <span className="text-xs font-mono font-semibold tracking-wide group-hover:text-white transition-colors">
           Save Contact
         </span>
-        <span className="text-[9px] font-mono text-industrial-zinc mt-0.5">.vcf export</span>
+        <div className="flex items-center gap-1 mt-0.5">
+          <span className="text-[9px] font-mono text-industrial-zinc">.vcf</span>
+          <kbd className="text-[8px] bg-chassis-inset px-1 rounded border border-chassis-border text-industrial-zinc">
+            V
+          </kbd>
+        </div>
       </button>
 
       {/* Optical QR Code */}
       <button
-        onClick={onOpenQR}
-        className="btn-tactile flex flex-col items-center justify-center py-3 px-2 rounded bg-chassis-module border border-chassis-border text-industrial-paper text-center group cursor-pointer"
+        onClick={handleOpenQR}
+        className="btn-tactile flex flex-col items-center justify-center py-3 px-2 rounded bg-chassis-module border border-chassis-border text-industrial-paper text-center group cursor-pointer relative"
       >
         <span className="text-[10px] font-mono text-industrial-zinc mb-1 tracking-wider uppercase font-bold">
           KEY // 02
         </span>
-        <span className="text-xs font-mono font-semibold tracking-wide">
+        <span className="text-xs font-mono font-semibold tracking-wide group-hover:text-white transition-colors">
           Scan QR Code
         </span>
-        <span className="text-[9px] font-mono text-industrial-zinc mt-0.5">optical spec</span>
+        <div className="flex items-center gap-1 mt-0.5">
+          <span className="text-[9px] font-mono text-industrial-zinc">optical</span>
+          <kbd className="text-[8px] bg-chassis-inset px-1 rounded border border-chassis-border text-industrial-zinc">
+            Q
+          </kbd>
+        </div>
       </button>
 
       {/* Copy Email */}
       <button
         onClick={handleCopyEmail}
-        className="btn-tactile flex flex-col items-center justify-center py-3 px-2 rounded bg-chassis-module border border-chassis-border text-industrial-paper text-center group cursor-pointer"
+        className="btn-tactile flex flex-col items-center justify-center py-3 px-2 rounded bg-chassis-module border border-chassis-border text-industrial-paper text-center group cursor-pointer relative"
       >
         <span className="text-[10px] font-mono text-industrial-zinc mb-1 tracking-wider uppercase font-bold">
           {copiedEmail ? (
@@ -93,10 +121,15 @@ export function ActionRow({ onOpenQR, onNotify }: ActionRowProps) {
             "KEY // 03"
           )}
         </span>
-        <span className="text-xs font-mono font-semibold tracking-wide">
+        <span className="text-xs font-mono font-semibold tracking-wide group-hover:text-white transition-colors">
           {copiedEmail ? "Copied" : "Copy Email"}
         </span>
-        <span className="text-[9px] font-mono text-industrial-zinc mt-0.5">me@kittipan.net</span>
+        <div className="flex items-center gap-1 mt-0.5">
+          <span className="text-[9px] font-mono text-industrial-zinc">direct</span>
+          <kbd className="text-[8px] bg-chassis-inset px-1 rounded border border-chassis-border text-industrial-zinc">
+            C
+          </kbd>
+        </div>
       </button>
     </div>
   );

@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { profileConfig } from "@/config/profile";
+import { sound } from "@/lib/sound";
 
 interface QRCodeModalProps {
   isOpen: boolean;
@@ -16,7 +17,10 @@ export function QRCodeModal({ isOpen, onClose, onNotify }: QRCodeModalProps) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        sound.playMechanicalClick();
+        onClose();
+      }
     };
     if (isOpen) {
       window.addEventListener("keydown", handleKeyDown);
@@ -24,7 +28,13 @@ export function QRCodeModal({ isOpen, onClose, onNotify }: QRCodeModalProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
+  const handleClose = () => {
+    sound.playMechanicalClick();
+    onClose();
+  };
+
   const handleCopy = async () => {
+    sound.playSuccessChime();
     try {
       await navigator.clipboard.writeText(profileConfig.websiteUrl);
       setCopied(true);
@@ -36,6 +46,7 @@ export function QRCodeModal({ isOpen, onClose, onNotify }: QRCodeModalProps) {
   };
 
   const handleDownload = () => {
+    sound.playSuccessChime();
     if (!qrRef.current) return;
     const svg = qrRef.current.querySelector("svg");
     if (!svg) return;
@@ -69,7 +80,7 @@ export function QRCodeModal({ isOpen, onClose, onNotify }: QRCodeModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Dark matte backdrop */}
       <div
-        onClick={onClose}
+        onClick={handleClose}
         className="absolute inset-0 bg-black/85 backdrop-blur-sm"
       />
 
@@ -87,8 +98,8 @@ export function QRCodeModal({ isOpen, onClose, onNotify }: QRCodeModalProps) {
             OPTICAL SCANNER // UNIT: KS-01
           </span>
           <button
-            onClick={onClose}
-            className="text-industrial-zinc hover:text-white px-2 py-0.5 rounded bg-chassis-module border border-chassis-border"
+            onClick={handleClose}
+            className="text-industrial-zinc hover:text-white px-2 py-0.5 rounded bg-chassis-module border border-chassis-border cursor-pointer"
           >
             ESC ✕
           </button>
@@ -115,14 +126,14 @@ export function QRCodeModal({ isOpen, onClose, onNotify }: QRCodeModalProps) {
         <div className="grid grid-cols-2 gap-2 text-xs">
           <button
             onClick={handleCopy}
-            className="btn-tactile py-2.5 px-3 rounded bg-chassis-module border border-chassis-border text-industrial-paper font-semibold hover:border-chassis-highlight"
+            className="btn-tactile py-2.5 px-3 rounded bg-chassis-module border border-chassis-border text-industrial-paper font-semibold hover:border-chassis-highlight cursor-pointer"
           >
             {copied ? "COPIED ✓" : "COPY LINK"}
           </button>
 
           <button
             onClick={handleDownload}
-            className="btn-tactile py-2.5 px-3 rounded bg-chassis-module border border-industrial-orange/60 text-industrial-orange font-semibold hover:bg-chassis-hover"
+            className="btn-tactile py-2.5 px-3 rounded bg-chassis-module border border-industrial-orange/60 text-industrial-orange font-semibold hover:bg-chassis-hover cursor-pointer"
           >
             SAVE PNG
           </button>
