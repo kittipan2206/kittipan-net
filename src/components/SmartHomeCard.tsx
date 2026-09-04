@@ -12,66 +12,61 @@ export function SmartHomeCard() {
   };
 
   return (
-    <div className="w-full h-full p-4 flex flex-col justify-between font-mono">
-      {/* Top Rackmount Ear / Module Header */}
+    <div className="w-full h-full p-6 sm:p-7 flex flex-col justify-between">
+      {/* Header Badge */}
       <div>
-        <div className="flex items-center justify-between border-b border-chassis-border/80 pb-2 mb-3 text-[11px]">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 bg-industrial-orange inline-block" />
-            <span className="text-industrial-paper font-bold tracking-wider">
-              {smartHomeNode.nodeId}
+        <div className="flex items-center justify-between mb-4">
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-medium text-emerald-400">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
-          </div>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-chassis-inset border border-chassis-border text-[10px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-industrial-diode shadow-diode" />
-            <span className="text-industrial-diode font-semibold tracking-wider">
-              {smartHomeNode.status}
-            </span>
-          </div>
-        </div>
-
-        {/* Main Title & Link */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-          <div>
-            <h3 className="text-sm sm:text-base font-bold text-industrial-paper tracking-wide font-sans uppercase">
-              {smartHomeNode.label}
-            </h3>
-            <p className="text-xs font-mono text-industrial-orange tracking-wide">
-              https://{smartHomeNode.subtext}
-            </p>
+            <span>Home Assistant OS • Online</span>
           </div>
 
-          {/* Launch Hardware Button */}
-          <a
-            href={smartHomeNode.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleLaunch}
-            className="btn-tactile inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded bg-chassis-base border border-chassis-border text-industrial-paper text-xs font-mono font-semibold tracking-wide hover:border-industrial-orange transition-colors shrink-0 group"
-          >
-            <span>ACCESS PORT</span>
-            <span className="text-industrial-orange group-hover:translate-x-0.5 transition-transform">→</span>
-            <kbd className="text-[9px] bg-chassis-inset px-1 py-0.2 rounded border border-chassis-border text-industrial-zinc">
-              H
-            </kbd>
-          </a>
+          <span className="text-xs font-mono text-zinc-500">
+            Hyper-V Isolated
+          </span>
         </div>
+
+        {/* Main Content */}
+        <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight mb-2">
+          {smartHomeNode.label}
+        </h3>
+        <p className="text-sm text-zinc-400 leading-relaxed mb-6 max-w-xl">
+          {smartHomeNode.description}
+        </p>
       </div>
 
-      {/* Telemetry Spec Strip (Engraved bottom plate) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2.5 border-t border-chassis-border/60 text-[10px] font-mono text-industrial-zinc">
-        <div className="flex items-center gap-1.5">
-          <span className="text-chassis-highlight font-bold">CORE:</span>
-          <span className="text-industrial-paper">{smartHomeNode.core}</span>
+      {/* Footer Specs & Action Button */}
+      <div className="pt-4 border-t border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* Spec Pills */}
+        <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-zinc-400">
+          <span className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.06]">
+            {smartHomeNode.specs.virtualization}
+          </span>
+          <span className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.06]">
+            {smartHomeNode.specs.core}
+          </span>
+          <span className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.06]">
+            Zero Trust
+          </span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-chassis-highlight font-bold">HOST:</span>
-          <span className="text-industrial-paper">{smartHomeNode.host}</span>
-        </div>
-        <div className="flex items-center gap-1.5 sm:justify-end">
-          <span className="text-chassis-highlight font-bold">PERIMETER:</span>
-          <span className="text-industrial-paper">Zero Trust</span>
-        </div>
+
+        {/* Launch Button */}
+        <a
+          href={smartHomeNode.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleLaunch}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white text-zinc-950 font-medium text-sm hover:bg-zinc-200 transition-all shadow-md group shrink-0"
+        >
+          <span>Access Portal</span>
+          <span className="group-hover:translate-x-0.5 transition-transform text-zinc-700">↗</span>
+          <kbd className="hidden sm:inline-block text-[10px] bg-zinc-200 px-1.5 py-0.5 rounded text-zinc-700 font-mono">
+            H
+          </kbd>
+        </a>
       </div>
     </div>
   );

@@ -16,12 +16,11 @@ export function ActionRow({ onOpenQR, onNotify }: ActionRowProps) {
   const handleDownloadVCard = () => {
     sound.playSuccessChime();
 
-    // Trigger celebratory particle confetti
     confetti({
       particleCount: 50,
       spread: 60,
       origin: { y: 0.7 },
-      colors: ["#FF4F00", "#22C55E", "#EDEDED"],
+      colors: ["#ff5500", "#10b981", "#ffffff"],
     });
 
     const { vCard } = profileConfig;
@@ -48,7 +47,7 @@ export function ActionRow({ onOpenQR, onNotify }: ActionRowProps) {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    onNotify("VCARD EXPORTED // CONTACT SAVED");
+    onNotify("Contact saved (.vcf)");
   };
 
   const handleCopyEmail = async () => {
@@ -56,10 +55,10 @@ export function ActionRow({ onOpenQR, onNotify }: ActionRowProps) {
     try {
       await navigator.clipboard.writeText(profileConfig.email);
       setCopiedEmail(true);
-      onNotify(`COPIED // ${profileConfig.email}`);
+      onNotify(`Copied ${profileConfig.email}`);
       setTimeout(() => setCopiedEmail(false), 2200);
     } catch {
-      onNotify("ERROR // CLIPBOARD UNAVAILABLE");
+      onNotify("Clipboard unavailable");
     }
   };
 
@@ -69,68 +68,54 @@ export function ActionRow({ onOpenQR, onNotify }: ActionRowProps) {
   };
 
   return (
-    <div className="grid grid-cols-3 gap-2 w-full font-mono">
-      {/* Save Contact (.vcf) */}
-      <button
-        onClick={handleDownloadVCard}
-        className="btn-tactile flex flex-col items-center justify-center py-3 px-2 rounded bg-chassis-module border border-chassis-border text-industrial-paper text-center group cursor-pointer relative"
-      >
-        <span className="text-[10px] font-mono text-industrial-orange mb-1 tracking-wider uppercase font-bold flex items-center gap-1">
-          <span className="w-1.5 h-1.5 bg-industrial-orange rounded-none inline-block" />
-          KEY // 01
-        </span>
-        <span className="text-xs font-mono font-semibold tracking-wide group-hover:text-white transition-colors">
-          Save Contact
-        </span>
-        <div className="flex items-center gap-1 mt-0.5">
-          <span className="text-[9px] font-mono text-industrial-zinc">.vcf</span>
-          <kbd className="text-[8px] bg-chassis-inset px-1 rounded border border-chassis-border text-industrial-zinc">
-            V
-          </kbd>
+    <div className="w-full h-full p-6 sm:p-7 flex flex-col justify-between">
+      <div>
+        <div className="text-xs text-zinc-500 font-medium mb-3">
+          Quick Actions
         </div>
-      </button>
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          {/* Save Contact */}
+          <button
+            onClick={handleDownloadVCard}
+            className="interactive-pill flex flex-col items-center justify-center p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] text-center transition-all cursor-pointer group"
+          >
+            <span className="text-base mb-1">📇</span>
+            <span className="text-xs font-medium text-zinc-200 group-hover:text-white">
+              Save Contact
+            </span>
+            <span className="text-[10px] text-zinc-500 font-mono mt-0.5">.vcf</span>
+          </button>
 
-      {/* Optical QR Code */}
-      <button
-        onClick={handleOpenQR}
-        className="btn-tactile flex flex-col items-center justify-center py-3 px-2 rounded bg-chassis-module border border-chassis-border text-industrial-paper text-center group cursor-pointer relative"
-      >
-        <span className="text-[10px] font-mono text-industrial-zinc mb-1 tracking-wider uppercase font-bold">
-          KEY // 02
-        </span>
-        <span className="text-xs font-mono font-semibold tracking-wide group-hover:text-white transition-colors">
-          Scan QR Code
-        </span>
-        <div className="flex items-center gap-1 mt-0.5">
-          <span className="text-[9px] font-mono text-industrial-zinc">optical</span>
-          <kbd className="text-[8px] bg-chassis-inset px-1 rounded border border-chassis-border text-industrial-zinc">
-            Q
-          </kbd>
-        </div>
-      </button>
+          {/* Scan QR Code */}
+          <button
+            onClick={handleOpenQR}
+            className="interactive-pill flex flex-col items-center justify-center p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] text-center transition-all cursor-pointer group"
+          >
+            <span className="text-base mb-1">📱</span>
+            <span className="text-xs font-medium text-zinc-200 group-hover:text-white">
+              Scan QR
+            </span>
+            <span className="text-[10px] text-zinc-500 font-mono mt-0.5">Code</span>
+          </button>
 
-      {/* Copy Email */}
-      <button
-        onClick={handleCopyEmail}
-        className="btn-tactile flex flex-col items-center justify-center py-3 px-2 rounded bg-chassis-module border border-chassis-border text-industrial-paper text-center group cursor-pointer relative"
-      >
-        <span className="text-[10px] font-mono text-industrial-zinc mb-1 tracking-wider uppercase font-bold">
-          {copiedEmail ? (
-            <span className="text-industrial-diode">COPIED</span>
-          ) : (
-            "KEY // 03"
-          )}
-        </span>
-        <span className="text-xs font-mono font-semibold tracking-wide group-hover:text-white transition-colors">
-          {copiedEmail ? "Copied" : "Copy Email"}
-        </span>
-        <div className="flex items-center gap-1 mt-0.5">
-          <span className="text-[9px] font-mono text-industrial-zinc">direct</span>
-          <kbd className="text-[8px] bg-chassis-inset px-1 rounded border border-chassis-border text-industrial-zinc">
-            C
-          </kbd>
+          {/* Copy Email */}
+          <button
+            onClick={handleCopyEmail}
+            className="interactive-pill flex flex-col items-center justify-center p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] text-center transition-all cursor-pointer group"
+          >
+            <span className="text-base mb-1">{copiedEmail ? "✓" : "✉️"}</span>
+            <span className="text-xs font-medium text-zinc-200 group-hover:text-white">
+              {copiedEmail ? "Copied" : "Copy Email"}
+            </span>
+            <span className="text-[10px] text-zinc-500 font-mono mt-0.5">Direct</span>
+          </button>
         </div>
-      </button>
+      </div>
+
+      <div className="pt-3 mt-4 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-500">
+        <span>Press <kbd className="bg-white/[0.06] px-1 py-0.5 rounded text-zinc-300 font-mono">V</kbd> or <kbd className="bg-white/[0.06] px-1 py-0.5 rounded text-zinc-300 font-mono">C</kbd></span>
+        <span className="text-zinc-400">me@kittipan.net</span>
+      </div>
     </div>
   );
 }

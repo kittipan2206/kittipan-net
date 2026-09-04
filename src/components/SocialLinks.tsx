@@ -48,13 +48,6 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   mail: MailIcon,
 };
 
-const hotkeyMap: Record<string, string> = {
-  github: "G",
-  telegram: "T",
-  facebook: "F",
-  email: "E",
-};
-
 export function SocialLinks() {
   const { portLinks } = profileConfig;
 
@@ -63,22 +56,15 @@ export function SocialLinks() {
   };
 
   return (
-    <div className="w-full p-4 flex flex-col justify-between font-mono h-full">
-      {/* Section Machine Label */}
+    <div className="w-full h-full p-6 sm:p-7 flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between border-b border-chassis-border/80 pb-2 mb-2.5 text-[10px] text-industrial-zinc">
-          <span className="font-bold tracking-wider uppercase flex items-center gap-1.5 text-industrial-paper">
-            <span className="w-1.5 h-1.5 bg-chassis-border inline-block" />
-            COMMUNICATION INTERCONNECTS // PATCHBAY
-          </span>
-          <span>4 ACTIVE PORTS</span>
+        <div className="text-xs text-zinc-500 font-medium mb-3">
+          Channels & Network
         </div>
 
-        {/* Port Rows */}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {portLinks.map((port: PortLink) => {
             const Icon = iconMap[port.icon] || MailIcon;
-            const hotkey = hotkeyMap[port.id];
 
             return (
               <a
@@ -87,39 +73,31 @@ export function SocialLinks() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={handleClick}
-                className="btn-tactile group flex items-center justify-between p-2.5 rounded bg-chassis-module border border-chassis-border hover:border-chassis-highlight text-left transition-all"
+                className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.05] hover:border-white/[0.12] transition-all group"
               >
-                <div className="flex items-center gap-2.5">
-                  {/* Port Number indicator */}
-                  <span className="font-mono text-xs font-bold text-industrial-zinc group-hover:text-industrial-orange transition-colors">
-                    [{port.portNumber}]
-                  </span>
-
-                  <div className="p-1.5 rounded bg-chassis-inset border border-chassis-border/80 text-industrial-paper group-hover:text-industrial-orange transition-colors">
-                    <Icon className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-3.5">
+                  <div className="p-2 rounded-lg bg-white/[0.04] text-zinc-300 group-hover:text-white transition-colors">
+                    <Icon className="w-4 h-4" />
                   </div>
-
                   <div>
-                    <div className="text-xs font-mono font-bold text-industrial-paper group-hover:text-white transition-colors">
-                      {port.label}
+                    <div className="text-sm font-medium text-zinc-200 group-hover:text-white transition-colors flex items-center gap-2">
+                      <span>{port.label}</span>
+                      <span className="text-xs text-zinc-500 font-mono font-normal">
+                        {port.handle}
+                      </span>
                     </div>
-                    <div className="text-[10px] font-mono text-industrial-zinc">
-                      {port.targetHandle}
+                    <div className="text-xs text-zinc-400">
+                      {port.description}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="hidden sm:inline-block text-[8px] font-mono text-industrial-zinc px-1.5 py-0.5 rounded bg-chassis-inset border border-chassis-border/60">
-                    {port.protocol}
-                  </span>
-                  {hotkey && (
-                    <kbd className="text-[9px] bg-chassis-inset px-1 py-0.2 rounded border border-chassis-border text-industrial-zinc group-hover:text-industrial-orange">
-                      {hotkey}
-                    </kbd>
-                  )}
-                  <span className="text-xs font-mono text-chassis-border group-hover:text-industrial-orange group-hover:translate-x-0.5 transition-all">
-                    →
+                  <kbd className="hidden sm:inline-block text-[10px] bg-white/[0.04] px-1.5 py-0.5 rounded text-zinc-500 font-mono group-hover:text-zinc-300">
+                    {port.hotkey}
+                  </kbd>
+                  <span className="text-zinc-500 group-hover:text-white group-hover:translate-x-0.5 transition-all text-sm">
+                    ↗
                   </span>
                 </div>
               </a>

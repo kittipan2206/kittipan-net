@@ -1,22 +1,20 @@
 export interface PortLink {
   id: string;
-  portNumber: string;
   label: string;
   url: string;
-  targetHandle: string;
-  icon: 'github' | 'facebook' | 'telegram' | 'mail' | 'terminal';
-  protocol: string;
-  highlight?: boolean;
+  handle: string;
+  description: string;
+  icon: 'github' | 'facebook' | 'telegram' | 'mail';
+  hotkey: string;
 }
 
-export interface SystemSpec {
-  key: string;
-  value: string;
-  type: 'hardware' | 'network' | 'software';
+export interface TechItem {
+  name: string;
+  category: string;
+  detail: string;
 }
 
 export interface ProfileConfig {
-  serialNumber: string;
   name: string;
   handle: string;
   role: string;
@@ -26,17 +24,19 @@ export interface ProfileConfig {
   websiteUrl: string;
   email: string;
   smartHomeNode: {
-    nodeId: string;
     label: string;
     url: string;
-    status: 'ONLINE' | 'STANDBY';
     subtext: string;
-    host: string;
-    routing: string;
-    core: string;
+    status: 'ONLINE' | 'STANDBY';
+    description: string;
+    specs: {
+      virtualization: string;
+      core: string;
+      network: string;
+    };
   };
   portLinks: PortLink[];
-  systemSpecs: SystemSpec[];
+  techStack: TechItem[];
   vCard: {
     firstName: string;
     lastName: string;
@@ -49,80 +49,79 @@ export interface ProfileConfig {
 }
 
 export const profileConfig: ProfileConfig = {
-  serialNumber: "SPECIMEN // KS-NET-01",
   name: "Kittipan Sankoh",
   handle: "@kittipan",
-  role: "Systems & Homelab Builder",
-  statement: "Building dedicated hardware environments, private IoT networks, and resilient automation pipelines.",
+  role: "Systems & Automation Engineer",
+  statement: "Designing resilient private cloud infrastructure, self-hosted automation pipelines, and isolated hardware networks.",
   location: "Bangkok, Thailand",
   timezone: "UTC+7",
   websiteUrl: "https://kittipan.net",
   email: "me@kittipan.net",
   smartHomeNode: {
-    nodeId: "NODE // HA-HYPERV",
-    label: "Smart Home Portal",
+    label: "Private Home Cloud & Automation",
     url: "https://home.kittipan.net",
-    status: "ONLINE",
     subtext: "home.kittipan.net",
-    host: "Hyper-V Virtualization",
-    routing: "Cloudflare Zero Trust Tunnel",
-    core: "Home Assistant OS 13.x",
+    status: "ONLINE",
+    description: "Self-hosted Home Assistant OS virtualized on dedicated Hyper-V hardware, protected by Cloudflare Zero Trust tunnel.",
+    specs: {
+      virtualization: "Microsoft Hyper-V",
+      core: "Home Assistant OS 13.x",
+      network: "Cloudflare Zero Trust Tunnel",
+    },
   },
   portLinks: [
     {
       id: "github",
-      portNumber: "01",
-      label: "GitHub Repositories",
+      label: "GitHub",
       url: "https://github.com/kittipan2206",
-      targetHandle: "kittipan2206",
+      handle: "kittipan2206",
+      description: "Repositories, automation configs & tools",
       icon: "github",
-      protocol: "HTTPS // GIT",
-      highlight: true,
+      hotkey: "G",
     },
     {
       id: "telegram",
-      portNumber: "02",
-      label: "Home Automation Bot",
+      label: "J.A.R.V.I.S. Bot",
       url: "https://t.me/kittipan_ha_bot",
-      targetHandle: "@kittipan_ha_bot",
+      handle: "@kittipan_ha_bot",
+      description: "Telegram smart home assistant & voice dispatch",
       icon: "telegram",
-      protocol: "BOT-API // TELEGRAM",
-      highlight: true,
-    },
-    {
-      id: "facebook",
-      portNumber: "03",
-      label: "Personal Profile",
-      url: "https://facebook.com",
-      targetHandle: "Kittipan Sankoh",
-      icon: "facebook",
-      protocol: "HTTPS // SOCIAL",
+      hotkey: "T",
     },
     {
       id: "email",
-      portNumber: "04",
-      label: "Direct Inbound Mail",
+      label: "Direct Email",
       url: "mailto:me@kittipan.net",
-      targetHandle: "me@kittipan.net",
+      handle: "me@kittipan.net",
+      description: "Inbound correspondence & collaboration",
       icon: "mail",
-      protocol: "SMTP // CLOUDFLARE ROUTING",
+      hotkey: "C",
+    },
+    {
+      id: "facebook",
+      label: "Facebook",
+      url: "https://facebook.com",
+      handle: "Kittipan Sankoh",
+      description: "Personal social network & updates",
+      icon: "facebook",
+      hotkey: "F",
     },
   ],
-  systemSpecs: [
-    { key: "VIRTUALIZATION", value: "Microsoft Hyper-V", type: "hardware" },
-    { key: "AUTOMATION CORE", value: "Home Assistant OS", type: "software" },
-    { key: "PERIMETER", value: "Cloudflare Zero Trust", type: "network" },
-    { key: "EDGE HOSTING", value: "Cloudflare Pages (Static)", type: "network" },
-    { key: "IOT PROTOCOLS", value: "Zigbee 3.0 / Tuya LAN", type: "hardware" },
-    { key: "STACK", value: "Next.js 15 / Tailwind / TS", type: "software" },
+  techStack: [
+    { name: "Hyper-V", category: "Hardware", detail: "Dedicated Hypervisor" },
+    { name: "Home Assistant", category: "Core", detail: "Private IoT Automation" },
+    { name: "Cloudflare Zero Trust", category: "Network", detail: "Encrypted Edge Tunnel" },
+    { name: "Zigbee 3.0 & Tuya LAN", category: "IoT", detail: "Local Mesh Protocols" },
+    { name: "Next.js 15 & Tailwind", category: "Frontend", detail: "Edge Static Web" },
+    { name: "Python & Gemini AI", category: "Intelligence", detail: "Automation Agents" },
   ],
   vCard: {
     firstName: "Kittipan",
     lastName: "Sankoh",
     organization: "Systems & Homelab Infrastructure",
-    title: "Systems & Homelab Builder",
+    title: "Systems & Automation Engineer",
     email: "me@kittipan.net",
     url: "https://kittipan.net",
-    note: "Kittipan Sankoh // Systems, Home Assistant & Homelab Infrastructure. Contact: me@kittipan.net",
+    note: "Kittipan Sankoh — Systems & Automation Engineer. Contact: me@kittipan.net",
   },
 };

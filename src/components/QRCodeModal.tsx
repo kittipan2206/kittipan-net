@@ -38,10 +38,10 @@ export function QRCodeModal({ isOpen, onClose, onNotify }: QRCodeModalProps) {
     try {
       await navigator.clipboard.writeText(profileConfig.websiteUrl);
       setCopied(true);
-      onNotify("COPIED // URL CLIPBOARD");
+      onNotify("Link copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      onNotify("ERROR // CLIPBOARD UNAVAILABLE");
+      onNotify("Clipboard unavailable");
     }
   };
 
@@ -68,7 +68,7 @@ export function QRCodeModal({ isOpen, onClose, onNotify }: QRCodeModalProps) {
         downloadLink.download = `${profileConfig.handle.replace("@", "")}-qr.png`;
         downloadLink.href = pngFile;
         downloadLink.click();
-        onNotify("SAVED // QR PNG IMAGE");
+        onNotify("QR Code saved as PNG");
       }
     };
     img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
@@ -81,34 +81,28 @@ export function QRCodeModal({ isOpen, onClose, onNotify }: QRCodeModalProps) {
       {/* Dark matte backdrop */}
       <div
         onClick={handleClose}
-        className="absolute inset-0 bg-black/85 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/80 backdrop-blur-md"
       />
 
-      {/* Optical Inspection Window */}
-      <div className="relative w-full max-w-sm rounded bg-chassis-base border-2 border-chassis-border p-6 shadow-2xl z-10 text-center font-mono">
-        {/* Corner alignment marks */}
-        <span className="absolute top-2 left-2 text-[10px] text-industrial-zinc select-none">+</span>
-        <span className="absolute top-2 right-2 text-[10px] text-industrial-zinc select-none">+</span>
-        <span className="absolute bottom-2 left-2 text-[10px] text-industrial-zinc select-none">+</span>
-        <span className="absolute bottom-2 right-2 text-[10px] text-industrial-zinc select-none">+</span>
-
+      {/* Modern Modal Frame */}
+      <div className="relative w-full max-w-sm rounded-2xl bg-[#0f1116] border border-white/[0.1] p-6 shadow-2xl z-10 text-center">
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-chassis-border pb-2.5 mb-4 text-xs">
-          <span className="text-industrial-orange font-bold uppercase tracking-wider">
-            OPTICAL SCANNER // UNIT: KS-01
+        <div className="flex items-center justify-between pb-3 mb-5 border-b border-white/[0.06]">
+          <span className="text-xs font-semibold text-zinc-300 tracking-wide">
+            QR Code
           </span>
           <button
             onClick={handleClose}
-            className="text-industrial-zinc hover:text-white px-2 py-0.5 rounded bg-chassis-module border border-chassis-border cursor-pointer"
+            className="text-zinc-400 hover:text-white px-2 py-0.5 rounded-md bg-white/[0.04] text-xs transition-colors cursor-pointer"
           >
-            ESC ✕
+            Esc ✕
           </button>
         </div>
 
         {/* QR Code Frame */}
         <div
           ref={qrRef}
-          className="mx-auto w-52 h-52 p-4 bg-white rounded flex items-center justify-center mb-4 border border-chassis-border shadow-inner"
+          className="mx-auto w-52 h-52 p-4 bg-white rounded-xl flex items-center justify-center mb-4 shadow-xl"
         >
           <QRCodeSVG
             value={profileConfig.websiteUrl}
@@ -118,7 +112,7 @@ export function QRCodeModal({ isOpen, onClose, onNotify }: QRCodeModalProps) {
           />
         </div>
 
-        <p className="text-xs text-industrial-orange bg-chassis-inset border border-chassis-border py-1.5 px-3 rounded mb-4 inline-block font-mono">
+        <p className="text-xs text-orange-400 bg-white/[0.03] border border-white/[0.06] py-1.5 px-3 rounded-lg mb-5 inline-block font-mono">
           {profileConfig.websiteUrl}
         </p>
 
@@ -126,16 +120,16 @@ export function QRCodeModal({ isOpen, onClose, onNotify }: QRCodeModalProps) {
         <div className="grid grid-cols-2 gap-2 text-xs">
           <button
             onClick={handleCopy}
-            className="btn-tactile py-2.5 px-3 rounded bg-chassis-module border border-chassis-border text-industrial-paper font-semibold hover:border-chassis-highlight cursor-pointer"
+            className="interactive-pill py-2.5 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-zinc-200 font-medium transition-all cursor-pointer"
           >
-            {copied ? "COPIED ✓" : "COPY LINK"}
+            {copied ? "Copied ✓" : "Copy Link"}
           </button>
 
           <button
             onClick={handleDownload}
-            className="btn-tactile py-2.5 px-3 rounded bg-chassis-module border border-industrial-orange/60 text-industrial-orange font-semibold hover:bg-chassis-hover cursor-pointer"
+            className="interactive-pill py-2.5 px-3 rounded-xl bg-white text-zinc-950 font-medium hover:bg-zinc-200 transition-all cursor-pointer shadow-md"
           >
-            SAVE PNG
+            Save PNG
           </button>
         </div>
       </div>

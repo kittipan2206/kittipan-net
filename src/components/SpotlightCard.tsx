@@ -29,15 +29,6 @@ export function SpotlightCard({
     });
   };
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setMousePos({ x: -999, y: -999 });
-  };
-
   const handleClick = () => {
     if (playClickSound) {
       sound.playMechanicalClick();
@@ -51,21 +42,24 @@ export function SpotlightCard({
     <div
       ref={cardRef}
       onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setMousePos({ x: -999, y: -999 });
+      }}
       onClick={handleClick}
-      className={`relative rounded-md bg-chassis-module border border-chassis-border overflow-hidden transition-all duration-150 ${className}`}
+      className={`relative rounded-2xl bg-[#0e1015]/80 backdrop-blur-md border border-white/[0.07] hover:border-white/[0.14] overflow-hidden transition-all duration-200 shadow-lg ${className}`}
     >
-      {/* Specular Radial Highlight Layer */}
+      {/* Specular Radial Spotlight Glow */}
       <div
         className="pointer-events-none absolute -inset-px transition-opacity duration-300 z-0"
         style={{
           opacity: isHovered ? 1 : 0,
-          background: `radial-gradient(280px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255, 79, 0, 0.18), transparent 75%)`,
+          background: `radial-gradient(350px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255, 85, 0, 0.09), transparent 80%)`,
         }}
       />
 
-      {/* Inner Machined Content */}
+      {/* Inner Content Container */}
       <div className="relative z-10 w-full h-full">
         {children}
       </div>

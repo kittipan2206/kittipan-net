@@ -6,7 +6,7 @@ import { sound } from "@/lib/sound";
 
 export interface CommandItem {
   id: string;
-  category: "NODES" | "ACTIONS" | "CHANNELS" | "SYSTEM";
+  category: "Navigation" | "Actions" | "Channels" | "Preferences";
   title: string;
   subtitle: string;
   hotkey: string;
@@ -39,9 +39,9 @@ export function CommandPalette({
   const commands: CommandItem[] = useMemo(() => [
     {
       id: "smarthome",
-      category: "NODES",
-      title: "Launch Smart Home Portal",
-      subtitle: "https://home.kittipan.net (Hyper-V / Cloudflare Tunnel)",
+      category: "Navigation",
+      title: "Smart Home Portal",
+      subtitle: "Open home.kittipan.net (Hyper-V / Cloudflare Tunnel)",
       hotkey: "H",
       action: () => {
         sound.playMechanicalClick();
@@ -51,9 +51,9 @@ export function CommandPalette({
     },
     {
       id: "save-vcard",
-      category: "ACTIONS",
-      title: "Save Contact Card (.vcf)",
-      subtitle: "Export digital business card directly to device",
+      category: "Actions",
+      title: "Save Contact (.vcf)",
+      subtitle: "Download digital contact card to your phone or computer",
       hotkey: "V",
       action: () => {
         sound.playSuccessChime();
@@ -79,32 +79,32 @@ export function CommandPalette({
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        onNotify("VCARD EXPORTED // CONTACT SAVED");
+        onNotify("Contact saved (.vcf)");
         onClose();
       },
     },
     {
       id: "copy-email",
-      category: "ACTIONS",
-      title: "Copy Direct Email",
+      category: "Actions",
+      title: "Copy Email Address",
       subtitle: profileConfig.email,
       hotkey: "C",
       action: async () => {
         sound.playSuccessChime();
         try {
           await navigator.clipboard.writeText(profileConfig.email);
-          onNotify(`COPIED // ${profileConfig.email}`);
+          onNotify(`Copied ${profileConfig.email}`);
         } catch {
-          onNotify("ERROR // CLIPBOARD UNAVAILABLE");
+          onNotify("Clipboard unavailable");
         }
         onClose();
       },
     },
     {
       id: "scan-qr",
-      category: "ACTIONS",
-      title: "Inspect Optical QR Code",
-      subtitle: "Generate optical link preview & download high-res PNG",
+      category: "Actions",
+      title: "Show QR Code",
+      subtitle: "Scan to open on mobile or export high-res PNG",
       hotkey: "Q",
       action: () => {
         sound.playMechanicalClick();
@@ -114,8 +114,8 @@ export function CommandPalette({
     },
     {
       id: "github",
-      category: "CHANNELS",
-      title: "Open GitHub Profile",
+      category: "Channels",
+      title: "GitHub Repositories",
       subtitle: "https://github.com/kittipan2206",
       hotkey: "G",
       action: () => {
@@ -126,8 +126,8 @@ export function CommandPalette({
     },
     {
       id: "telegram",
-      category: "CHANNELS",
-      title: "Launch Telegram Automation Bot",
+      category: "Channels",
+      title: "Telegram Assistant Bot",
       subtitle: "@kittipan_ha_bot (Home Assistant AI Bot)",
       hotkey: "T",
       action: () => {
@@ -138,9 +138,9 @@ export function CommandPalette({
     },
     {
       id: "toggle-sound",
-      category: "SYSTEM",
-      title: isSoundActive ? "Mute Mechanical Sound FX" : "Enable Mechanical Sound FX",
-      subtitle: isSoundActive ? "Sound is currently ON" : "Sound is currently OFF",
+      category: "Preferences",
+      title: isSoundActive ? "Mute Sound Feedback" : "Enable Sound Feedback",
+      subtitle: isSoundActive ? "Audio feedback is currently active" : "Audio feedback is currently muted",
       hotkey: "M",
       action: () => {
         onToggleSound();
@@ -149,7 +149,6 @@ export function CommandPalette({
     },
   ], [isSoundActive, onClose, onNotify, onOpenQR, onToggleSound]);
 
-  // Filter commands by search query
   const filteredCommands = useMemo(() => {
     if (!query.trim()) return commands;
     const q = query.toLowerCase();
@@ -166,7 +165,6 @@ export function CommandPalette({
     setSelectedIndex(0);
   }, [query]);
 
-  // Autofocus input on open
   useEffect(() => {
     if (isOpen) {
       sound.playMechanicalClick();
@@ -176,7 +174,6 @@ export function CommandPalette({
     }
   }, [isOpen]);
 
-  // Keyboard navigation
   useEffect(() => {
     if (!isOpen) return;
 
@@ -211,67 +208,42 @@ export function CommandPalette({
         }
         return;
       }
-
-      // Check single-key hotkey matches if not typing text inside input
-      if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1 && !query) {
-        const keyUpper = e.key.toUpperCase();
-        const matched = commands.find((c) => c.hotkey === keyUpper);
-        if (matched) {
-          e.preventDefault();
-          matched.action();
-        }
-      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, filteredCommands, selectedIndex, query, commands, onClose]);
+  }, [isOpen, filteredCommands, selectedIndex, onClose]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 font-mono">
-      {/* Backdrop blur */}
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 sm:pt-28 p-4">
+      {/* Backdrop */}
       <div
         onClick={() => {
           sound.playMechanicalClick();
           onClose();
         }}
-        className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity"
+        className="absolute inset-0 bg-black/80 backdrop-blur-md"
       />
 
-      {/* Palette Terminal Modal */}
-      <div className="relative w-full max-w-lg rounded-lg bg-chassis-base border-2 border-chassis-border shadow-2xl overflow-hidden z-10 text-industrial-paper">
-        {/* Machine Headstrip */}
-        <div className="flex items-center justify-between px-4 py-2 bg-chassis-module border-b border-chassis-border text-[10px] text-industrial-zinc">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-industrial-orange inline-block" />
-            <span className="font-bold text-industrial-paper tracking-wider uppercase">
-              COMMAND MATRIX // RAYCAST DISPATCH
-            </span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="px-1.5 py-0.5 rounded bg-chassis-inset border border-chassis-border text-industrial-zinc">
-              ESC TO CLOSE
-            </span>
-          </div>
-        </div>
-
-        {/* Search Input Bar */}
-        <div className="relative flex items-center px-4 py-3 border-b border-chassis-border bg-chassis-inset">
-          <span className="text-industrial-orange font-bold text-sm mr-2.5">❯</span>
+      {/* Palette Modal */}
+      <div className="relative w-full max-w-xl rounded-2xl bg-[#0f1116] border border-white/[0.1] shadow-2xl overflow-hidden z-10 text-white">
+        {/* Search Input */}
+        <div className="relative flex items-center px-4 py-3.5 border-b border-white/[0.08] bg-white/[0.02]">
+          <span className="text-zinc-500 mr-3 text-sm">🔍</span>
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Type a command or hotkey (H, G, T, C, Q, V, M)..."
-            className="w-full bg-transparent text-sm text-industrial-paper placeholder:text-industrial-zinc/60 outline-none font-mono"
+            placeholder="Type a command or search..."
+            className="w-full bg-transparent text-sm text-white placeholder:text-zinc-500 outline-none"
           />
           {query && (
             <button
               onClick={() => setQuery("")}
-              className="text-xs text-industrial-zinc hover:text-white px-1"
+              className="text-xs text-zinc-500 hover:text-white px-1.5"
             >
               ✕
             </button>
@@ -281,8 +253,8 @@ export function CommandPalette({
         {/* Command Items List */}
         <div ref={listRef} className="max-h-80 overflow-y-auto p-2 space-y-1">
           {filteredCommands.length === 0 ? (
-            <div className="py-8 text-center text-xs text-industrial-zinc">
-              NO DIRECTIVES FOUND MATCHING &quot;{query}&quot;
+            <div className="py-8 text-center text-xs text-zinc-500">
+              No directives found matching &quot;{query}&quot;
             </div>
           ) : (
             filteredCommands.map((cmd, idx) => {
@@ -292,63 +264,43 @@ export function CommandPalette({
                   key={cmd.id}
                   onClick={() => cmd.action()}
                   onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded cursor-pointer transition-all ${
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl cursor-pointer transition-all ${
                     isSelected
-                      ? "bg-industrial-orange/15 border border-industrial-orange/60 text-white"
-                      : "hover:bg-chassis-module text-industrial-paper border border-transparent"
+                      ? "bg-white/[0.08] text-white"
+                      : "hover:bg-white/[0.04] text-zinc-300"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span
-                      className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider ${
-                        isSelected
-                          ? "bg-industrial-orange text-black"
-                          : "bg-chassis-inset text-industrial-zinc border border-chassis-border"
-                      }`}
-                    >
+                    <span className="text-[10px] px-2 py-0.5 rounded-md uppercase font-medium bg-white/[0.04] text-zinc-400 border border-white/[0.05]">
                       {cmd.category}
                     </span>
                     <div>
-                      <div className="text-xs font-bold font-sans tracking-wide">
+                      <div className="text-sm font-medium text-white">
                         {cmd.title}
                       </div>
-                      <div className="text-[10px] text-industrial-zinc">
+                      <div className="text-xs text-zinc-400">
                         {cmd.subtitle}
                       </div>
                     </div>
                   </div>
 
-                  {/* Hotkey Badge */}
-                  <div className="flex items-center gap-1">
-                    <kbd
-                      className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold shadow-sm ${
-                        isSelected
-                          ? "bg-industrial-orange text-black"
-                          : "bg-chassis-inset border border-chassis-border text-industrial-zinc"
-                      }`}
-                    >
-                      {cmd.hotkey}
-                    </kbd>
-                  </div>
+                  <kbd className="px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-white/[0.06] border border-white/[0.08] text-zinc-400">
+                    {cmd.hotkey}
+                  </kbd>
                 </div>
               );
             })
           )}
         </div>
 
-        {/* Footer Navigation Hints */}
-        <div className="flex items-center justify-between px-4 py-2 border-t border-chassis-border/80 bg-chassis-module text-[10px] text-industrial-zinc">
+        {/* Footer */}
+        <div className="flex items-center justify-between px-4 py-2.5 border-t border-white/[0.06] bg-black/30 text-xs text-zinc-500">
           <div className="flex items-center gap-3">
-            <span>
-              <strong className="text-industrial-paper">↑↓</strong> NAVIGATE
-            </span>
-            <span>
-              <strong className="text-industrial-paper">↵</strong> EXECUTE
-            </span>
+            <span><strong className="text-zinc-300">↑↓</strong> to navigate</span>
+            <span><strong className="text-zinc-300">↵</strong> to select</span>
+            <span><strong className="text-zinc-300">esc</strong> to close</span>
           </div>
-          <span className="text-industrial-orange font-semibold">
-            {filteredCommands.length} DIRECTIVES READY
-          </span>
+          <span className="font-mono text-[11px]">{filteredCommands.length} commands</span>
         </div>
       </div>
     </div>

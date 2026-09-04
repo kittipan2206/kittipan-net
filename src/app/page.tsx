@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ProfileHeader } from "@/components/ProfileHeader";
-import { ActionRow } from "@/components/ActionRow";
+import confetti from "canvas-confetti";
 import { SmartHomeCard } from "@/components/SmartHomeCard";
 import { SocialLinks } from "@/components/SocialLinks";
 import { TechBadges } from "@/components/TechBadges";
@@ -19,6 +18,7 @@ export default function Home() {
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSoundActive, setIsSoundActive] = useState(true);
+  const [copiedEmail, setCopiedEmail] = useState(false);
 
   useEffect(() => {
     setIsSoundActive(sound.isEnabled());
@@ -34,7 +34,56 @@ export default function Home() {
   const handleToggleSound = () => {
     const newState = sound.toggle();
     setIsSoundActive(newState);
-    showNotification(newState ? "AUDIO FX // ENABLED" : "AUDIO FX // MUTED");
+    showNotification(newState ? "Audio feedback enabled" : "Audio feedback muted");
+  };
+
+  const handleDownloadVCard = () => {
+    sound.playSuccessChime();
+
+    confetti({
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.7 },
+      colors: ["#ff5500", "#10b981", "#ffffff"],
+    });
+
+    const { vCard } = profileConfig;
+    const vcfLines = [
+      "BEGIN:VCARD",
+      "VERSION:3.0",
+      `N:${vCard.lastName};${vCard.firstName};;;`,
+      `FN:${vCard.firstName} ${vCard.lastName}`,
+      `ORG:${vCard.organization}`,
+      `TITLE:${vCard.title}`,
+      `EMAIL;type=INTERNET;type=pref:${vCard.email}`,
+      `URL:${vCard.url}`,
+      `NOTE:${vCard.note}`,
+      "END:VCARD",
+    ];
+
+    const blob = new Blob([vcfLines.join("\r\n")], { type: "text/vcard;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${vCard.firstName.toLowerCase()}-${vCard.lastName.toLowerCase()}.vcf`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    showNotification("Contact saved (.vcf)");
+  };
+
+  const handleCopyEmail = async () => {
+    sound.playSuccessChime();
+    try {
+      await navigator.clipboard.writeText(profileConfig.email);
+      setCopiedEmail(true);
+      showNotification(`Copied ${profileConfig.email}`);
+      setTimeout(() => setCopiedEmail(false), 2200);
+    } catch {
+      showNotification("Clipboard unavailable");
+    }
   };
 
   // Global Keyboard Shortcuts (Cmd+K, H, G, T, C, Q, V, M)
@@ -43,14 +92,12 @@ export default function Home() {
       const activeTag = document.activeElement?.tagName.toLowerCase();
       if (activeTag === "input" || activeTag === "textarea") return;
 
-      // Cmd+K or Ctrl+K
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setIsCommandOpen((prev) => !prev);
         return;
       }
 
-      // Single-key hotkeys when modals are closed
       if (!isCommandOpen && !isQROpen && !e.metaKey && !e.ctrlKey && !e.altKey) {
         const key = e.key.toLowerCase();
         if (key === "m") {
@@ -60,6 +107,12 @@ export default function Home() {
           e.preventDefault();
           sound.playMechanicalClick();
           setIsQROpen(true);
+        } else if (key === "v") {
+          e.preventDefault();
+          handleDownloadVCard();
+        } else if (key === "c") {
+          e.preventDefault();
+          handleCopyEmail();
         } else if (key === "h") {
           e.preventDefault();
           sound.playMechanicalClick();
@@ -81,65 +134,145 @@ export default function Home() {
   }, [isCommandOpen, isQROpen]);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-2.5 sm:p-5 md:p-8 machined-surface text-industrial-paper">
-      {/* Central Machined Hardware Chassis Frame */}
-      <div className="relative w-full max-w-4xl my-auto rounded-lg bg-chassis-base border border-chassis-border p-4 sm:p-6 md:p-7 shadow-2xl">
-        {/* Machine Screw Fixtures (Teenage Engineering Hardware Aesthetic) */}
-        <div className="absolute top-2.5 left-2.5 text-chassis-highlight font-mono text-[10px] select-none">
-          ⨁
-        </div>
-        <div className="absolute top-2.5 right-2.5 text-chassis-highlight font-mono text-[10px] select-none">
-          ⨁
-        </div>
-        <div className="absolute bottom-2.5 left-2.5 text-chassis-highlight font-mono text-[10px] select-none">
-          ⨁
-        </div>
-        <div className="absolute bottom-2.5 right-2.5 text-chassis-highlight font-mono text-[10px] select-none">
-          ⨁
-        </div>
-
-        {/* Hardware Chassis Top Control Bar */}
-        <div className="w-full flex items-center justify-between border-b border-chassis-border/80 pb-3 mb-4 text-[10px] font-mono text-industrial-zinc px-1">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-none bg-industrial-orange inline-block" />
-            <span className="font-bold text-industrial-paper tracking-wider uppercase">
-              KITTIPAN // CONTROL MATRIX
+    <div className="min-h-screen ambient-mesh text-zinc-100 flex flex-col selection:bg-orange-500/30 selection:text-orange-300">
+      {/* Top Floating Navigation Bar */}
+      <header className="sticky top-0 z-40 w-full border-b border-white/[0.06] bg-[#08090c]/80 backdrop-blur-xl">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          {/* Identity Mark */}
+          <div className="flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(255,85,0,0.6)]" />
+            <span className="font-mono text-sm font-semibold text-white tracking-tight">
+              kittipan.net
+            </span>
+            <span className="text-zinc-600">/</span>
+            <span className="text-xs text-zinc-400 font-mono hidden sm:inline-block">
+              KS-01
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Controls Bar */}
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Command Palette Trigger */}
             <button
               onClick={() => {
                 sound.playMechanicalClick();
                 setIsCommandOpen(true);
               }}
-              className="btn-tactile flex items-center gap-1.5 px-2.5 py-1 rounded bg-chassis-module border border-chassis-border text-industrial-paper hover:border-industrial-orange transition-colors cursor-pointer"
+              className="interactive-pill flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.07] text-xs font-medium text-zinc-300 hover:text-white transition-all cursor-pointer"
             >
-              <span className="text-industrial-orange font-bold">⌘K</span>
-              <span className="hidden sm:inline">DISPATCH</span>
+              <span className="text-zinc-400">Search</span>
+              <kbd className="text-[10px] bg-white/[0.06] px-1.5 py-0.5 rounded text-zinc-400 font-mono border border-white/[0.06]">
+                ⌘K
+              </kbd>
             </button>
 
-            {/* Audio FX Rocker Switch */}
+            {/* Audio Toggle */}
             <button
               onClick={handleToggleSound}
-              title={isSoundActive ? "Mute Mechanical Audio FX" : "Enable Mechanical Audio FX"}
-              className={`btn-tactile flex items-center gap-1.5 px-2.5 py-1 rounded border transition-colors cursor-pointer ${
+              title={isSoundActive ? "Mute sound effects" : "Enable sound effects"}
+              className={`interactive-pill p-1.5 px-2.5 rounded-full text-xs font-medium border transition-all cursor-pointer flex items-center gap-1.5 ${
                 isSoundActive
-                  ? "bg-chassis-module border-industrial-orange/60 text-industrial-orange"
-                  : "bg-chassis-module border-chassis-border text-industrial-zinc"
+                  ? "bg-white/[0.06] border-orange-500/40 text-orange-400"
+                  : "bg-white/[0.03] border-white/[0.06] text-zinc-500 hover:text-zinc-300"
               }`}
             >
-              <span>{isSoundActive ? "🔊 FX ON" : "🔇 MUTED"}</span>
+              <span>{isSoundActive ? "🔊" : "🔇"}</span>
+              <span className="text-[10px] font-mono hidden sm:inline">
+                {isSoundActive ? "FX" : "MUTED"}
+              </span>
             </button>
           </div>
         </div>
+      </header>
+
+      {/* Main Content Body */}
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-10 sm:py-16">
+        {/* HERO SECTION */}
+        <section className="mb-12 sm:mb-16">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-xs font-medium text-zinc-400 mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+                <span>Systems & Homelab Infrastructure</span>
+                <span className="text-zinc-600">·</span>
+                <span>Bangkok, TH</span>
+              </div>
+
+              <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-3">
+                {profileConfig.name}
+              </h1>
+
+              <p className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-2xl font-normal">
+                {profileConfig.statement}
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Action Bar */}
+          <div className="flex flex-wrap items-center gap-2.5 pt-2">
+            <button
+              onClick={handleDownloadVCard}
+              className="interactive-pill inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-zinc-950 font-medium text-sm hover:bg-zinc-200 transition-all shadow-md cursor-pointer"
+            >
+              <span>Save Contact</span>
+              <kbd className="text-[10px] bg-zinc-200 px-1.5 py-0.5 rounded text-zinc-700 font-mono">
+                V
+              </kbd>
+            </button>
+
+            <button
+              onClick={handleCopyEmail}
+              className="interactive-pill inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-sm font-medium text-zinc-200 hover:text-white transition-all cursor-pointer"
+            >
+              <span>{copiedEmail ? "Copied" : "Copy Email"}</span>
+              <span className="text-xs text-zinc-500 font-mono">me@kittipan.net</span>
+              <kbd className="text-[10px] bg-white/[0.06] px-1.5 py-0.5 rounded text-zinc-400 font-mono">
+                C
+              </kbd>
+            </button>
+
+            <button
+              onClick={() => {
+                sound.playMechanicalClick();
+                setIsQROpen(true);
+              }}
+              className="interactive-pill inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-sm font-medium text-zinc-200 hover:text-white transition-all cursor-pointer"
+            >
+              <span>QR Code</span>
+              <kbd className="text-[10px] bg-white/[0.06] px-1.5 py-0.5 rounded text-zinc-400 font-mono">
+                Q
+              </kbd>
+            </button>
+
+            <a
+              href="https://github.com/kittipan2206"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => sound.playMechanicalClick()}
+              className="interactive-pill inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-sm font-medium text-zinc-300 hover:text-white transition-all"
+            >
+              <span>GitHub</span>
+              <span className="text-zinc-500 text-xs">↗</span>
+            </a>
+
+            <a
+              href="https://t.me/kittipan_ha_bot"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => sound.playMechanicalClick()}
+              className="interactive-pill inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-sm font-medium text-zinc-300 hover:text-white transition-all"
+            >
+              <span>Telegram Bot</span>
+              <span className="text-zinc-500 text-xs">↗</span>
+            </a>
+          </div>
+        </section>
 
         {/* BENTO GRID MATRIX */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {/* Bento Cell 1: Hero Identity Card (2 cols) */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+          {/* Bento Cell 1: Smart Home Portal (2 cols) */}
           <SpotlightCard className="md:col-span-2">
-            <ProfileHeader />
+            <SmartHomeCard />
           </SpotlightCard>
 
           {/* Bento Cell 2: Live Telemetry & Bangkok Clock (1 col) */}
@@ -147,50 +280,44 @@ export default function Home() {
             <LiveTelemetry />
           </SpotlightCard>
 
-          {/* Bento Cell 3: Smart Home Portal Node (2 cols) */}
-          <SpotlightCard className="md:col-span-2">
-            <SmartHomeCard />
-          </SpotlightCard>
-
-          {/* Bento Cell 4: Tactile Action Matrix (1 col) */}
-          <SpotlightCard className="md:col-span-1 p-3.5 flex flex-col justify-center">
-            <div className="w-full text-[10px] font-mono text-industrial-zinc border-b border-chassis-border/80 pb-2 mb-2.5 flex items-center justify-between">
-              <span className="font-bold tracking-wider uppercase text-industrial-paper">
-                QUICK DIRECTIVES
-              </span>
-              <span>KEY [1-3]</span>
-            </div>
-            <ActionRow
-              onOpenQR={() => setIsQROpen(true)}
-              onNotify={showNotification}
-            />
-          </SpotlightCard>
-
-          {/* Bento Cell 5: Patchbay Communication Ports (2 cols) */}
+          {/* Bento Cell 3: Channels & Social Connects (2 cols) */}
           <SpotlightCard className="md:col-span-2">
             <SocialLinks />
           </SpotlightCard>
 
-          {/* Bento Cell 6: System Spec Silkscreen Topology (1 col) */}
+          {/* Bento Cell 4: Infrastructure & Tech Stack (1 col) */}
           <SpotlightCard className="md:col-span-1">
             <TechBadges />
           </SpotlightCard>
-        </div>
+        </section>
 
-        {/* Machine Stamped Chassis Footer */}
-        <footer className="w-full pt-4 mt-3 border-t border-chassis-border/80 flex flex-col sm:flex-row items-center justify-between text-[10px] font-mono text-industrial-zinc gap-2 px-1">
-          <div>
-            ENGINEERED // {profileConfig.name.toUpperCase()}
-          </div>
+        {/* Minimal Editorial Footer */}
+        <footer className="mt-16 pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-industrial-orange font-bold">CF-PAGES // EDGE</span>
-            <span className="text-chassis-border">•</span>
-            <span>PRESS <strong className="text-industrial-paper">⌘K</strong> FOR COMMAND MATRIX</span>
+            <span className="font-mono text-zinc-400">kittipan.net</span>
+            <span>·</span>
+            <span>Bangkok, Thailand</span>
+          </div>
+
+          <div className="flex items-center gap-4 text-zinc-400 text-xs">
+            <span>Cloudflare Pages Edge</span>
+            <span>·</span>
+            <span>Next.js 15</span>
+            <span>·</span>
+            <button
+              onClick={() => {
+                sound.playMechanicalClick();
+                setIsCommandOpen(true);
+              }}
+              className="hover:text-white transition-colors cursor-pointer font-mono"
+            >
+              Press ⌘K
+            </button>
           </div>
         </footer>
-      </div>
+      </main>
 
-      {/* Raycast-Style Command Matrix Modal */}
+      {/* Command Palette Matrix Modal */}
       <CommandPalette
         isOpen={isCommandOpen}
         onClose={() => setIsCommandOpen(false)}
@@ -200,15 +327,15 @@ export default function Home() {
         isSoundActive={isSoundActive}
       />
 
-      {/* Optical QR Inspection Scanner Modal */}
+      {/* Optical QR Scanner Modal */}
       <QRCodeModal
         isOpen={isQROpen}
         onClose={() => setIsQROpen(false)}
         onNotify={showNotification}
       />
 
-      {/* Industrial Telemetry Toast */}
+      {/* Clean Telemetry Toast */}
       <Toast message={toastMessage} />
-    </main>
+    </div>
   );
 }
