@@ -4,7 +4,7 @@ export interface PortLink {
   url: string;
   handle: string;
   description: string;
-  icon: 'github' | 'facebook' | 'telegram' | 'mail';
+  icon: 'github' | 'linkedin' | 'facebook' | 'mail';
   hotkey: string;
 }
 
@@ -12,6 +12,13 @@ export interface TechItem {
   name: string;
   category: string;
   detail: string;
+}
+
+export interface EngineeringDomain {
+  title: string;
+  badge: string;
+  description: string;
+  highlights: string[];
 }
 
 export interface ProfileConfig {
@@ -23,20 +30,10 @@ export interface ProfileConfig {
   timezone: string;
   websiteUrl: string;
   email: string;
-  smartHomeNode?: {
-    label: string;
-    url: string;
-    subtext: string;
-    status: 'ONLINE' | 'STANDBY';
-    description: string;
-    specs: {
-      virtualization: string;
-      core: string;
-      network: string;
-    };
-  };
+  domains: EngineeringDomain[];
   portLinks: PortLink[];
   techStack: TechItem[];
+  interests: string[];
   vCard: {
     firstName: string;
     lastName: string;
@@ -52,27 +49,50 @@ export const profileConfig: ProfileConfig = {
   name: "Kittipan Sankoh",
   handle: "@kittipan",
   role: "Software & Mobile Engineer",
-  statement: "Crafting digital experiences across web, mobile applications, and resilient software systems.",
+  statement: "Specializing in cross-platform mobile engineering (Flutter / iOS / Android) and scalable modern web architecture. Dedicated to building reliable, high-performance digital products.",
   location: "Bangkok, Thailand",
   timezone: "UTC+7",
   websiteUrl: "https://kittipan.net",
   email: "me@kittipan.net",
+  domains: [
+    {
+      title: "Mobile Application Engineering",
+      badge: "Flutter · iOS · Android",
+      description: "Developing cross-platform mobile applications with native device integrations, reactive state management, and fluid motion design.",
+      highlights: ["Clean Architecture", "Offline-First Sync", "App Store & Play Store Delivery"],
+    },
+    {
+      title: "Scalable Web & System Architecture",
+      badge: "React · Next.js · TypeScript",
+      description: "Crafting modern web applications, high-concurrency public portals, and secure API integrations with edge-first deployment.",
+      highlights: ["SSR / Static Edge Delivery", "Type-Safe APIs", "Responsive UX"],
+    },
+  ],
   portLinks: [
+    {
+      id: "linkedin",
+      label: "LinkedIn",
+      url: "https://www.linkedin.com/in/kittipan-sankoh/",
+      handle: "in/kittipan-sankoh",
+      description: "Professional profile, background & network",
+      icon: "linkedin",
+      hotkey: "L",
+    },
     {
       id: "github",
       label: "GitHub",
       url: "https://github.com/kittipan2206",
       handle: "kittipan2206",
-      description: "Open source projects & repositories",
+      description: "Open source contributions, tools & code repositories",
       icon: "github",
       hotkey: "G",
     },
     {
       id: "email",
-      label: "Email",
+      label: "Direct Email",
       url: "mailto:me@kittipan.net",
       handle: "me@kittipan.net",
-      description: "Direct contact & business inquiries",
+      description: "Inquiries, collaboration & direct correspondence",
       icon: "mail",
       hotkey: "C",
     },
@@ -81,18 +101,23 @@ export const profileConfig: ProfileConfig = {
       label: "Facebook",
       url: "https://facebook.com",
       handle: "Kittipan Sankoh",
-      description: "Personal social network",
+      description: "Personal social profile",
       icon: "facebook",
       hotkey: "F",
     },
   ],
   techStack: [
-    { name: "Flutter & Dart", category: "Mobile", detail: "Cross-platform iOS & Android" },
-    { name: "React & Next.js", category: "Web", detail: "Modern Frontend Architecture" },
-    { name: "TypeScript", category: "Language", detail: "Type-safe Engineering" },
-    { name: "Node.js", category: "Backend", detail: "APIs & Web Services" },
-    { name: "Tailwind CSS", category: "Styling", detail: "Responsive Interface Design" },
-    { name: "Git & Cloudflare", category: "DevOps", detail: "CI/CD & Edge Deployment" },
+    { name: "Flutter & Dart", category: "Mobile", detail: "iOS & Android Apps" },
+    { name: "React & Next.js", category: "Web", detail: "Edge Web Architecture" },
+    { name: "TypeScript", category: "Language", detail: "Type-Safe Codebases" },
+    { name: "Node.js", category: "Backend", detail: "REST APIs & Services" },
+    { name: "Tailwind CSS", category: "UI/UX", detail: "Design Systems & Tokens" },
+    { name: "Git & Cloudflare", category: "DevOps", detail: "CI/CD & Edge Delivery" },
+  ],
+  interests: [
+    "IoT & Smart Home Tinkerer",
+    "Hardware Automation",
+    "AI-Assisted Workflow Tools",
   ],
   vCard: {
     firstName: "Kittipan",
@@ -101,6 +126,6 @@ export const profileConfig: ProfileConfig = {
     title: "Software & Mobile Engineer",
     email: "me@kittipan.net",
     url: "https://kittipan.net",
-    note: "Kittipan Sankoh — Software & Mobile Engineer. Contact: me@kittipan.net",
+    note: "Kittipan Sankoh — Software & Mobile Engineer. Mobile (Flutter, iOS, Android) & Modern Web. Contact: me@kittipan.net",
   },
 };

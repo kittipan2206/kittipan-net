@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import confetti from "canvas-confetti";
-import { SmartHomeCard } from "@/components/SmartHomeCard";
+import { EngineeringDomainCard } from "@/components/EngineeringDomainCard";
 import { SocialLinks } from "@/components/SocialLinks";
 import { TechBadges } from "@/components/TechBadges";
 import { QRCodeModal } from "@/components/QRCodeModal";
@@ -86,7 +86,7 @@ export default function Home() {
     }
   };
 
-  // Global Keyboard Shortcuts (Cmd+K, H, G, T, C, Q, V, M)
+  // Global Keyboard Shortcuts (Cmd+K, L, G, C, Q, V, M)
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       const activeTag = document.activeElement?.tagName.toLowerCase();
@@ -113,10 +113,10 @@ export default function Home() {
         } else if (key === "c") {
           e.preventDefault();
           handleCopyEmail();
-        } else if (key === "h" && profileConfig.smartHomeNode) {
+        } else if (key === "l") {
           e.preventDefault();
           sound.playMechanicalClick();
-          window.open(profileConfig.smartHomeNode.url, "_blank");
+          window.open("https://www.linkedin.com/in/kittipan-sankoh/", "_blank");
         } else if (key === "g") {
           e.preventDefault();
           sound.playMechanicalClick();
@@ -140,9 +140,9 @@ export default function Home() {
             <span className="font-mono text-sm font-semibold text-white tracking-tight">
               kittipan.net
             </span>
-            <span className="text-zinc-600">/</span>
+            <span className="text-zinc-600 hidden sm:inline">/</span>
             <span className="text-xs text-zinc-400 font-mono hidden sm:inline-block">
-              KS-01
+              Software & Mobile Engineer
             </span>
           </div>
 
@@ -189,7 +189,7 @@ export default function Home() {
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-xs font-medium text-zinc-400 mb-4">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
-                <span>Systems & Homelab Infrastructure</span>
+                <span>{profileConfig.role}</span>
                 <span className="text-zinc-600">·</span>
                 <span>Bangkok, TH</span>
               </div>
@@ -227,18 +227,19 @@ export default function Home() {
               </kbd>
             </button>
 
-            <button
-              onClick={() => {
-                sound.playMechanicalClick();
-                setIsQROpen(true);
-              }}
-              className="interactive-pill inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-sm font-medium text-zinc-200 hover:text-white transition-all cursor-pointer"
+            <a
+              href="https://www.linkedin.com/in/kittipan-sankoh/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => sound.playMechanicalClick()}
+              className="interactive-pill inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-sm font-medium text-zinc-200 hover:text-white transition-all"
             >
-              <span>QR Code</span>
+              <span>LinkedIn</span>
+              <span className="text-zinc-500 text-xs">↗</span>
               <kbd className="text-[10px] bg-white/[0.06] px-1.5 py-0.5 rounded text-zinc-400 font-mono">
-                Q
+                L
               </kbd>
-            </button>
+            </a>
 
             <a
               href="https://github.com/kittipan2206"
@@ -249,26 +250,31 @@ export default function Home() {
             >
               <span>GitHub</span>
               <span className="text-zinc-500 text-xs">↗</span>
+              <kbd className="text-[10px] bg-white/[0.06] px-1.5 py-0.5 rounded text-zinc-400 font-mono">
+                G
+              </kbd>
             </a>
 
-            <a
-
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => sound.playMechanicalClick()}
-              className="interactive-pill inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-sm font-medium text-zinc-300 hover:text-white transition-all"
+            <button
+              onClick={() => {
+                sound.playMechanicalClick();
+                setIsQROpen(true);
+              }}
+              className="interactive-pill inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-sm font-medium text-zinc-300 hover:text-white transition-all cursor-pointer"
             >
-
-              <span className="text-zinc-500 text-xs">↗</span>
-            </a>
+              <span>QR Code</span>
+              <kbd className="text-[10px] bg-white/[0.06] px-1.5 py-0.5 rounded text-zinc-400 font-mono">
+                Q
+              </kbd>
+            </button>
           </div>
         </section>
 
         {/* BENTO GRID MATRIX */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
-          {/* Bento Cell 1: Smart Home Portal (2 cols) */}
+          {/* Bento Cell 1: Core Engineering Domains (2 cols) */}
           <SpotlightCard className="md:col-span-2">
-            <SmartHomeCard />
+            <EngineeringDomainCard />
           </SpotlightCard>
 
           {/* Bento Cell 2: Live Telemetry & Bangkok Clock (1 col) */}
@@ -276,12 +282,12 @@ export default function Home() {
             <LiveTelemetry />
           </SpotlightCard>
 
-          {/* Bento Cell 3: Channels & Social Connects (2 cols) */}
+          {/* Bento Cell 3: Channels & Professional Network (2 cols) */}
           <SpotlightCard className="md:col-span-2">
             <SocialLinks />
           </SpotlightCard>
 
-          {/* Bento Cell 4: Infrastructure & Tech Stack (1 col) */}
+          {/* Bento Cell 4: Tech Stack & Interests (1 col) */}
           <SpotlightCard className="md:col-span-1">
             <TechBadges />
           </SpotlightCard>
@@ -291,6 +297,8 @@ export default function Home() {
         <footer className="mt-16 pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
           <div className="flex items-center gap-2">
             <span className="font-mono text-zinc-400">kittipan.net</span>
+            <span>·</span>
+            <span>Software & Mobile Engineer</span>
             <span>·</span>
             <span>Bangkok, Thailand</span>
           </div>

@@ -38,6 +38,30 @@ export function CommandPalette({
 
   const commands: CommandItem[] = useMemo(() => [
     {
+      id: "linkedin",
+      category: "Channels",
+      title: "Open LinkedIn Profile",
+      subtitle: "https://www.linkedin.com/in/kittipan-sankoh/",
+      hotkey: "L",
+      action: () => {
+        sound.playMechanicalClick();
+        window.open("https://www.linkedin.com/in/kittipan-sankoh/", "_blank");
+        onClose();
+      },
+    },
+    {
+      id: "github",
+      category: "Channels",
+      title: "Open GitHub Profile",
+      subtitle: "https://github.com/kittipan2206",
+      hotkey: "G",
+      action: () => {
+        sound.playMechanicalClick();
+        window.open("https://github.com/kittipan2206", "_blank");
+        onClose();
+      },
+    },
+    {
       id: "save-vcard",
       category: "Actions",
       title: "Save Contact (.vcf)",
@@ -98,18 +122,6 @@ export function CommandPalette({
         sound.playMechanicalClick();
         onClose();
         onOpenQR();
-      },
-    },
-    {
-      id: "github",
-      category: "Channels",
-      title: "GitHub Repositories",
-      subtitle: "https://github.com/kittipan2206",
-      hotkey: "G",
-      action: () => {
-        sound.playMechanicalClick();
-        window.open("https://github.com/kittipan2206", "_blank");
-        onClose();
       },
     },
     {
@@ -210,7 +222,7 @@ export function CommandPalette({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Type a command or search..."
+            placeholder="Type a command or search (L, G, C, V, Q, M)..."
             className="w-full bg-transparent text-sm text-white placeholder:text-zinc-500 outline-none"
           />
           {query && (
