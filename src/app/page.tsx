@@ -113,7 +113,7 @@ export default function Home() {
         } else if (key === "c") {
           e.preventDefault();
           handleCopyEmail();
-        } else if (key === "h") {
+        } else if (key === "h" && profileConfig.smartHomeNode) {
           e.preventDefault();
           sound.playMechanicalClick();
           window.open(profileConfig.smartHomeNode.url, "_blank");
@@ -121,10 +121,6 @@ export default function Home() {
           e.preventDefault();
           sound.playMechanicalClick();
           window.open("https://github.com/kittipan2206", "_blank");
-        } else if (key === "t") {
-          e.preventDefault();
-          sound.playMechanicalClick();
-          window.open("https://t.me/kittipan_ha_bot", "_blank");
         }
       }
     };
@@ -256,13 +252,13 @@ export default function Home() {
             </a>
 
             <a
-              href="https://t.me/kittipan_ha_bot"
+
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => sound.playMechanicalClick()}
               className="interactive-pill inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-sm font-medium text-zinc-300 hover:text-white transition-all"
             >
-              <span>Telegram Bot</span>
+
               <span className="text-zinc-500 text-xs">↗</span>
             </a>
           </div>

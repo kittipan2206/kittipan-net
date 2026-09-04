@@ -23,7 +23,7 @@ export interface ProfileConfig {
   timezone: string;
   websiteUrl: string;
   email: string;
-  smartHomeNode: {
+  smartHomeNode?: {
     label: string;
     url: string;
     subtext: string;
@@ -51,49 +51,28 @@ export interface ProfileConfig {
 export const profileConfig: ProfileConfig = {
   name: "Kittipan Sankoh",
   handle: "@kittipan",
-  role: "Systems & Automation Engineer",
-  statement: "Designing resilient private cloud infrastructure, self-hosted automation pipelines, and isolated hardware networks.",
+  role: "Software & Mobile Engineer",
+  statement: "Crafting digital experiences across web, mobile applications, and resilient software systems.",
   location: "Bangkok, Thailand",
   timezone: "UTC+7",
   websiteUrl: "https://kittipan.net",
   email: "me@kittipan.net",
-  smartHomeNode: {
-    label: "Private Home Cloud & Automation",
-    url: "https://home.kittipan.net",
-    subtext: "home.kittipan.net",
-    status: "ONLINE",
-    description: "Self-hosted Home Assistant OS virtualized on dedicated Hyper-V hardware, protected by Cloudflare Zero Trust tunnel.",
-    specs: {
-      virtualization: "Microsoft Hyper-V",
-      core: "Home Assistant OS 13.x",
-      network: "Cloudflare Zero Trust Tunnel",
-    },
-  },
   portLinks: [
     {
       id: "github",
       label: "GitHub",
       url: "https://github.com/kittipan2206",
       handle: "kittipan2206",
-      description: "Repositories, automation configs & tools",
+      description: "Open source projects & repositories",
       icon: "github",
       hotkey: "G",
     },
     {
-      id: "telegram",
-      label: "J.A.R.V.I.S. Bot",
-      url: "https://t.me/kittipan_ha_bot",
-      handle: "@kittipan_ha_bot",
-      description: "Telegram smart home assistant & voice dispatch",
-      icon: "telegram",
-      hotkey: "T",
-    },
-    {
       id: "email",
-      label: "Direct Email",
+      label: "Email",
       url: "mailto:me@kittipan.net",
       handle: "me@kittipan.net",
-      description: "Inbound correspondence & collaboration",
+      description: "Direct contact & business inquiries",
       icon: "mail",
       hotkey: "C",
     },
@@ -102,26 +81,26 @@ export const profileConfig: ProfileConfig = {
       label: "Facebook",
       url: "https://facebook.com",
       handle: "Kittipan Sankoh",
-      description: "Personal social network & updates",
+      description: "Personal social network",
       icon: "facebook",
       hotkey: "F",
     },
   ],
   techStack: [
-    { name: "Hyper-V", category: "Hardware", detail: "Dedicated Hypervisor" },
-    { name: "Home Assistant", category: "Core", detail: "Private IoT Automation" },
-    { name: "Cloudflare Zero Trust", category: "Network", detail: "Encrypted Edge Tunnel" },
-    { name: "Zigbee 3.0 & Tuya LAN", category: "IoT", detail: "Local Mesh Protocols" },
-    { name: "Next.js 15 & Tailwind", category: "Frontend", detail: "Edge Static Web" },
-    { name: "Python & Gemini AI", category: "Intelligence", detail: "Automation Agents" },
+    { name: "Flutter & Dart", category: "Mobile", detail: "Cross-platform iOS & Android" },
+    { name: "React & Next.js", category: "Web", detail: "Modern Frontend Architecture" },
+    { name: "TypeScript", category: "Language", detail: "Type-safe Engineering" },
+    { name: "Node.js", category: "Backend", detail: "APIs & Web Services" },
+    { name: "Tailwind CSS", category: "Styling", detail: "Responsive Interface Design" },
+    { name: "Git & Cloudflare", category: "DevOps", detail: "CI/CD & Edge Deployment" },
   ],
   vCard: {
     firstName: "Kittipan",
     lastName: "Sankoh",
-    organization: "Systems & Homelab Infrastructure",
-    title: "Systems & Automation Engineer",
+    organization: "Software Engineering",
+    title: "Software & Mobile Engineer",
     email: "me@kittipan.net",
     url: "https://kittipan.net",
-    note: "Kittipan Sankoh — Systems & Automation Engineer. Contact: me@kittipan.net",
+    note: "Kittipan Sankoh — Software & Mobile Engineer. Contact: me@kittipan.net",
   },
 };

@@ -6,6 +6,7 @@ import { sound } from "@/lib/sound";
 
 export function SmartHomeCard() {
   const { smartHomeNode } = profileConfig;
+  if (!smartHomeNode) return null;
 
   const handleLaunch = () => {
     sound.playMechanicalClick();
@@ -13,7 +14,6 @@ export function SmartHomeCard() {
 
   return (
     <div className="w-full h-full p-6 sm:p-7 flex flex-col justify-between">
-      {/* Header Badge */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-medium text-emerald-400">
@@ -29,7 +29,6 @@ export function SmartHomeCard() {
           </span>
         </div>
 
-        {/* Main Content */}
         <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight mb-2">
           {smartHomeNode.label}
         </h3>
@@ -38,9 +37,7 @@ export function SmartHomeCard() {
         </p>
       </div>
 
-      {/* Footer Specs & Action Button */}
       <div className="pt-4 border-t border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        {/* Spec Pills */}
         <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-zinc-400">
           <span className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.06]">
             {smartHomeNode.specs.virtualization}
@@ -53,7 +50,6 @@ export function SmartHomeCard() {
           </span>
         </div>
 
-        {/* Launch Button */}
         <a
           href={smartHomeNode.url}
           target="_blank"

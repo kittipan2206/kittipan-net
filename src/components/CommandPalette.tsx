@@ -38,18 +38,6 @@ export function CommandPalette({
 
   const commands: CommandItem[] = useMemo(() => [
     {
-      id: "smarthome",
-      category: "Navigation",
-      title: "Smart Home Portal",
-      subtitle: "Open home.kittipan.net (Hyper-V / Cloudflare Tunnel)",
-      hotkey: "H",
-      action: () => {
-        sound.playMechanicalClick();
-        window.open(profileConfig.smartHomeNode.url, "_blank");
-        onClose();
-      },
-    },
-    {
       id: "save-vcard",
       category: "Actions",
       title: "Save Contact (.vcf)",
@@ -121,18 +109,6 @@ export function CommandPalette({
       action: () => {
         sound.playMechanicalClick();
         window.open("https://github.com/kittipan2206", "_blank");
-        onClose();
-      },
-    },
-    {
-      id: "telegram",
-      category: "Channels",
-      title: "Telegram Assistant Bot",
-      subtitle: "@kittipan_ha_bot (Home Assistant AI Bot)",
-      hotkey: "T",
-      action: () => {
-        sound.playMechanicalClick();
-        window.open("https://t.me/kittipan_ha_bot", "_blank");
         onClose();
       },
     },
@@ -218,7 +194,6 @@ export function CommandPalette({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 sm:pt-28 p-4">
-      {/* Backdrop */}
       <div
         onClick={() => {
           sound.playMechanicalClick();
@@ -227,9 +202,7 @@ export function CommandPalette({
         className="absolute inset-0 bg-black/80 backdrop-blur-md"
       />
 
-      {/* Palette Modal */}
       <div className="relative w-full max-w-xl rounded-2xl bg-[#0f1116] border border-white/[0.1] shadow-2xl overflow-hidden z-10 text-white">
-        {/* Search Input */}
         <div className="relative flex items-center px-4 py-3.5 border-b border-white/[0.08] bg-white/[0.02]">
           <span className="text-zinc-500 mr-3 text-sm">🔍</span>
           <input
@@ -250,7 +223,6 @@ export function CommandPalette({
           )}
         </div>
 
-        {/* Command Items List */}
         <div ref={listRef} className="max-h-80 overflow-y-auto p-2 space-y-1">
           {filteredCommands.length === 0 ? (
             <div className="py-8 text-center text-xs text-zinc-500">
@@ -293,7 +265,6 @@ export function CommandPalette({
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-between px-4 py-2.5 border-t border-white/[0.06] bg-black/30 text-xs text-zinc-500">
           <div className="flex items-center gap-3">
             <span><strong className="text-zinc-300">↑↓</strong> to navigate</span>
