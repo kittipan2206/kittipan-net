@@ -3,67 +3,66 @@
 @tailwind utilities;
 
 :root {
-  --background: #080a0f;
-  --foreground: #f3f4f6;
+  --bg-chassis: #0c0d10;
+  --text-main: #EDEDED;
+  --text-muted: #8E93A2;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--text-main);
+  background-color: var(--bg-chassis);
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   overflow-x: hidden;
   position: relative;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Ambient dynamic background grid & lights */
-.cyber-grid {
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
+/* Subtle physical machined surface - raw matte anodized metal texture */
+.machined-surface {
+  background-color: #121418;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
+  background-size: 24px 24px;
 }
 
-/* Glassmorphism glass card */
-.glass-panel {
-  background: rgba(18, 24, 38, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+/* Chassis panel with laser-cut machined borders */
+.chassis-box {
+  background-color: #15171d;
+  border: 1px solid #252834;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
-.glass-panel:hover {
-  background: rgba(22, 30, 48, 0.8);
-  border-color: rgba(255, 255, 255, 0.18);
-  transform: translateY(-2px);
+/* Tactile push button dynamics - physical click feel */
+.btn-tactile {
+  box-shadow: 0 2px 0 0 #282c39, 0 3px 6px rgba(0, 0, 0, 0.4);
+  transition: all 0.08s ease-out;
 }
 
-/* Subtle glow animations */
-.glow-cyan {
-  box-shadow: 0 0 20px -3px rgba(0, 240, 255, 0.35);
+.btn-tactile:hover {
+  background-color: #1e212b;
+  border-color: #353949;
 }
 
-.glow-emerald {
-  box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.35);
+.btn-tactile:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 0 #282c39, 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-/* Custom scrollbar */
+/* Custom industrial scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #080a0f;
+  background: #0c0d10;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 9999px;
+  background: #252834;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #353949;
 }

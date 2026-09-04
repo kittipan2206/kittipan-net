@@ -1,11 +1,8 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
-import { ExternalLink, Globe } from "lucide-react";
-import { profileConfig, SocialLink } from "@/config/profile";
+import { profileConfig, PortLink } from "@/config/profile";
 
-// Crisp official brand SVG icons
 function GitHubIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -43,75 +40,72 @@ function MailIcon({ className }: { className?: string }) {
   );
 }
 
-const iconComponentMap: Record<string, React.ComponentType<{ className?: string }>> = {
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   github: GitHubIcon,
   telegram: TelegramIcon,
   facebook: FacebookIcon,
   mail: MailIcon,
-  globe: Globe,
 };
 
 export function SocialLinks() {
-  const { socialLinks } = profileConfig;
+  const { portLinks } = profileConfig;
 
   return (
-    <div className="w-full space-y-3 mb-6">
-      <div className="flex items-center justify-between px-1 mb-1">
-        <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-          Connect & Channels
+    <div className="w-full mb-6">
+      {/* Section Machine Label */}
+      <div className="flex items-center justify-between border-b border-chassis-border pb-2 mb-2 text-[10px] font-mono text-industrial-zinc">
+        <span className="font-bold tracking-wider uppercase flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 bg-chassis-border inline-block" />
+          COMMUNICATION INTERCONNECTS // PATCHBAY
         </span>
-        <span className="text-[11px] font-mono text-gray-500">
-          {socialLinks.length} Links
-        </span>
+        <span>4 ACTIVE PORTS</span>
       </div>
 
-      {socialLinks.map((link: SocialLink, index: number) => {
-        const IconComponent = iconComponentMap[link.icon] || Globe;
+      {/* Port Rows */}
+      <div className="space-y-1.5">
+        {portLinks.map((port: PortLink) => {
+          const Icon = iconMap[port.icon] || MailIcon;
 
-        return (
-          <motion.a
-            key={link.id}
-            href={link.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 + index * 0.05 }}
-            className="group relative flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 hover:border-white/20 shadow-sm transition-all duration-200 hover:-translate-y-0.5"
-          >
-            <div className="flex items-center gap-3.5">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/[0.04] border border-white/10 group-hover:scale-105 transition-transform"
-                style={{ color: link.color || "#00F0FF" }}
-              >
-                <IconComponent className="w-5 h-5" />
-              </div>
+          return (
+            <a
+              key={port.id}
+              href={port.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-tactile group flex items-center justify-between p-3 rounded bg-chassis-module border border-chassis-border hover:border-chassis-highlight text-left transition-all"
+            >
+              <div className="flex items-center gap-3">
+                {/* Port Number indicator */}
+                <span className="font-mono text-xs font-bold text-industrial-zinc group-hover:text-industrial-orange transition-colors">
+                  [{port.portNumber}]
+                </span>
 
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-white tracking-wide">
-                    {link.label}
-                  </span>
-                  {link.badge && (
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-cyan-950/70 border border-cyan-800/40 text-cyan-300">
-                      {link.badge}
-                    </span>
-                  )}
+                <div className="p-1.5 rounded bg-chassis-inset border border-chassis-border/80 text-industrial-paper group-hover:text-industrial-orange transition-colors">
+                  <Icon className="w-4 h-4" />
                 </div>
-                {link.username && (
-                  <p className="text-xs font-mono text-gray-400">
-                    {link.username}
-                  </p>
-                )}
-              </div>
-            </div>
 
-            <div className="p-1.5 rounded-lg text-gray-500 group-hover:text-white group-hover:translate-x-0.5 transition-all">
-              <ExternalLink className="w-4 h-4" />
-            </div>
-          </motion.a>
-        );
-      })}
+                <div>
+                  <div className="text-xs font-mono font-bold text-industrial-paper group-hover:text-white transition-colors">
+                    {port.label}
+                  </div>
+                  <div className="text-[10px] font-mono text-industrial-zinc">
+                    {port.targetHandle}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline-block text-[9px] font-mono text-industrial-zinc px-1.5 py-0.5 rounded bg-chassis-inset border border-chassis-border/60">
+                  {port.protocol}
+                </span>
+                <span className="text-xs font-mono text-chassis-border group-hover:text-industrial-orange transition-colors">
+                  →
+                </span>
+              </div>
+            </a>
+          );
+        })}
+      </div>
     </div>
   );
 }

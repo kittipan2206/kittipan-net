@@ -9,42 +9,37 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#0a0d14",
-        surface: {
-          DEFAULT: "rgba(255, 255, 255, 0.03)",
-          hover: "rgba(255, 255, 255, 0.07)",
-          border: "rgba(255, 255, 255, 0.08)",
-          "border-hover": "rgba(255, 255, 255, 0.2)",
+        chassis: {
+          void: "#0c0d10",
+          base: "#121418",
+          module: "#171920",
+          inset: "#0e0f13",
+          hover: "#1d2029",
+          border: "#252834",
+          highlight: "#353949",
         },
-        cyber: {
-          cyan: "#00F0FF",
-          emerald: "#10B981",
-          blue: "#3B82F6",
-          purple: "#8B5CF6",
+        industrial: {
+          orange: "#FF4F00", // Signature Teenage Engineering / Braun safety orange
+          "orange-hover": "#FF671F",
+          "orange-muted": "rgba(255, 79, 0, 0.12)",
+          diode: "#22C55E", // Precision hardware LED green
+          amber: "#F59E0B",
+          zinc: "#8E93A2",
+          paper: "#EDEDED",
         },
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-      },
-      animation: {
-        "pulse-glow": "pulseGlow 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        "mesh-float": "meshFloat 20s ease-in-out infinite alternate",
-      },
-      keyframes: {
-        pulseGlow: {
-          "0%, 100%": { opacity: "0.4", transform: "scale(1)" },
-          "50%": { opacity: "0.8", transform: "scale(1.05)" },
-        },
-        meshFloat: {
-          "0%": { transform: "translate(0px, 0px) scale(1)" },
-          "50%": { transform: "translate(30px, -20px) scale(1.1)" },
-          "100%": { transform: "translate(-20px, 20px) scale(0.95)" },
-        },
+        sans: ["var(--font-sans)", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
+        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"],
       },
       boxShadow: {
-        glass: "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
-        "cyan-glow": "0 0 25px -5px rgba(0, 240, 255, 0.3)",
-        "emerald-glow": "0 0 25px -5px rgba(16, 185, 129, 0.3)",
+        // Physical tactile button depth (unpressed)
+        tactile: "0 2px 0 0 #252834, 0 4px 12px rgba(0, 0, 0, 0.5)",
+        // Inset engraved panel shadow
+        engraved: "inset 0 1px 3px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.04)",
+        // Subtle diode glow (tight, not blurry blob)
+        diode: "0 0 8px 1px rgba(34, 197, 94, 0.6)",
+        "diode-orange": "0 0 8px 1px rgba(255, 79, 0, 0.6)",
       },
     },
   },

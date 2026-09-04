@@ -1,71 +1,69 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
-import { Home, ExternalLink, ShieldCheck, Cpu } from "lucide-react";
 import { profileConfig } from "@/config/profile";
 
 export function SmartHomeCard() {
-  const { smartHome } = profileConfig;
+  const { smartHomeNode } = profileConfig;
 
   return (
-    <motion.a
-      href={smartHome.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.15 }}
-      className="group relative block w-full rounded-2xl p-4 sm:p-5 overflow-hidden border border-cyan-500/30 bg-gradient-to-br from-[#121c2e] via-[#0d1624] to-[#0a0e1a] shadow-xl hover:border-cyan-400/60 transition-all duration-300 hover:shadow-cyan-glow"
-    >
-      {/* Background glow overlay */}
-      <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none group-hover:bg-cyan-500/20 transition duration-500" />
-      <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none group-hover:bg-emerald-500/20 transition duration-500" />
-
-      <div className="relative z-10">
-        {/* Top Header Row */}
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 group-hover:bg-cyan-500/20 transition-colors">
-              <Home className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-white tracking-wide">
-                  {smartHome.title}
-                </span>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-950/80 border border-emerald-500/40 text-emerald-300">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  {smartHome.statusText}
-                </span>
-              </div>
-              <p className="text-xs font-mono text-cyan-400/80">{smartHome.subtext}</p>
-            </div>
-          </div>
-
-          <div className="p-2 rounded-lg text-gray-400 group-hover:text-cyan-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all">
-            <ExternalLink className="w-4 h-4" />
-          </div>
-        </div>
-
-        {/* Description */}
-        <p className="text-xs text-gray-300 mb-3 leading-relaxed">
-          {smartHome.description}
-        </p>
-
-        {/* Specs Pills */}
-        <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-white/5 text-[11px] text-gray-400">
-          <span className="inline-flex items-center gap-1">
-            <Cpu className="w-3 h-3 text-cyan-400" />
-            Hyper-V Host
+    <div className="w-full chassis-box rounded p-4 mb-6 relative overflow-hidden bg-chassis-module border border-chassis-border">
+      {/* Top Rackmount Ear / Module Header */}
+      <div className="flex items-center justify-between border-b border-chassis-border/80 pb-2.5 mb-3 text-[11px] font-mono">
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 bg-industrial-orange inline-block" />
+          <span className="text-industrial-paper font-bold tracking-wider">
+            {smartHomeNode.nodeId}
           </span>
-          <span className="text-gray-600">•</span>
-          <span className="inline-flex items-center gap-1">
-            <ShieldCheck className="w-3 h-3 text-emerald-400" />
-            Cloudflare Zero Trust
+        </div>
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-chassis-inset border border-chassis-border text-[10px]">
+          <span className="w-1.5 h-1.5 rounded-full bg-industrial-diode shadow-diode" />
+          <span className="text-industrial-diode font-semibold tracking-wider">
+            {smartHomeNode.status}
           </span>
         </div>
       </div>
-    </motion.a>
+
+      {/* Main Content Area */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-sm sm:text-base font-bold text-industrial-paper tracking-wide font-sans uppercase">
+              {smartHomeNode.label}
+            </h3>
+          </div>
+          <p className="text-xs font-mono text-industrial-orange tracking-wide">
+            https://{smartHomeNode.subtext}
+          </p>
+        </div>
+
+        {/* Launch Hardware Button */}
+        <a
+          href={smartHomeNode.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-tactile inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded bg-chassis-base border border-chassis-border text-industrial-paper text-xs font-mono font-semibold tracking-wide hover:border-industrial-orange transition-colors shrink-0"
+        >
+          <span>ACCESS PORT</span>
+          <span className="text-industrial-orange">→</span>
+        </a>
+      </div>
+
+      {/* Telemetry Spec Strip (Engraved bottom plate) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2.5 border-t border-chassis-border/60 text-[10px] font-mono text-industrial-zinc">
+        <div className="flex items-center gap-1.5">
+          <span className="text-chassis-highlight font-bold">CORE:</span>
+          <span className="text-industrial-paper">{smartHomeNode.core}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-chassis-highlight font-bold">HOST:</span>
+          <span className="text-industrial-paper">{smartHomeNode.host}</span>
+        </div>
+        <div className="flex items-center gap-1.5 sm:justify-end">
+          <span className="text-chassis-highlight font-bold">PERIMETER:</span>
+          <span className="text-industrial-paper">Zero Trust</span>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
-import { X, Copy, Download, Check } from "lucide-react";
 import { profileConfig } from "@/config/profile";
 
 interface QRCodeModalProps {
@@ -30,10 +28,10 @@ export function QRCodeModal({ isOpen, onClose, onNotify }: QRCodeModalProps) {
     try {
       await navigator.clipboard.writeText(profileConfig.websiteUrl);
       setCopied(true);
-      onNotify("Link copied to clipboard!");
+      onNotify("COPIED // URL CLIPBOARD");
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      onNotify("Failed to copy link");
+      onNotify("ERROR // CLIPBOARD UNAVAILABLE");
     }
   };
 
@@ -59,89 +57,77 @@ export function QRCodeModal({ isOpen, onClose, onNotify }: QRCodeModalProps) {
         downloadLink.download = `${profileConfig.handle.replace("@", "")}-qr.png`;
         downloadLink.href = pngFile;
         downloadLink.click();
-        onNotify("QR Code downloaded!");
+        onNotify("SAVED // QR PNG IMAGE");
       }
     };
     img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
   };
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Dark matte backdrop */}
+      <div
+        onClick={onClose}
+        className="absolute inset-0 bg-black/85 backdrop-blur-sm"
+      />
+
+      {/* Optical Inspection Window */}
+      <div className="relative w-full max-w-sm rounded bg-chassis-base border-2 border-chassis-border p-6 shadow-2xl z-10 text-center font-mono">
+        {/* Corner alignment marks */}
+        <span className="absolute top-2 left-2 text-[10px] text-industrial-zinc select-none">+</span>
+        <span className="absolute top-2 right-2 text-[10px] text-industrial-zinc select-none">+</span>
+        <span className="absolute bottom-2 left-2 text-[10px] text-industrial-zinc select-none">+</span>
+        <span className="absolute bottom-2 right-2 text-[10px] text-industrial-zinc select-none">+</span>
+
+        {/* Modal Header */}
+        <div className="flex items-center justify-between border-b border-chassis-border pb-2.5 mb-4 text-xs">
+          <span className="text-industrial-orange font-bold uppercase tracking-wider">
+            OPTICAL SCANNER // UNIT: KS-01
+          </span>
+          <button
             onClick={onClose}
-            className="absolute inset-0 bg-black/75 backdrop-blur-md"
-          />
-
-          {/* Dialog */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-sm rounded-3xl bg-gradient-to-b from-[#161c2c] to-[#0c101c] p-6 border border-white/10 shadow-2xl z-10 text-center"
+            className="text-industrial-zinc hover:text-white px-2 py-0.5 rounded bg-chassis-module border border-chassis-border"
           >
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              aria-label="Close modal"
-              className="absolute right-4 top-4 p-2 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h3 className="text-xl font-bold text-white mb-1">Scan to Connect</h3>
-            <p className="text-xs text-gray-400 mb-6">
-              Instant digital business card for your smartphone
-            </p>
-
-            {/* QR Code Container */}
-            <div
-              ref={qrRef}
-              className="relative mx-auto w-56 h-56 p-4 bg-white rounded-2xl shadow-inner flex items-center justify-center glow-cyan mb-6"
-            >
-              <QRCodeSVG
-                value={profileConfig.websiteUrl}
-                size={192}
-                level="H"
-                includeMargin={false}
-              />
-            </div>
-
-            <p className="text-xs font-mono text-cyan-400 bg-cyan-950/40 border border-cyan-800/40 py-1.5 px-3 rounded-lg mb-6 inline-block">
-              {profileConfig.websiteUrl}
-            </p>
-
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={handleCopy}
-                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-gray-200 transition-colors"
-              >
-                {copied ? (
-                  <Check className="w-4 h-4 text-emerald-400" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-                {copied ? "Copied" : "Copy Link"}
-              </button>
-
-              <button
-                onClick={handleDownload}
-                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-xs font-medium text-cyan-300 transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Save Image
-              </button>
-            </div>
-          </motion.div>
+            ESC ✕
+          </button>
         </div>
-      )}
-    </AnimatePresence>
+
+        {/* QR Code Frame */}
+        <div
+          ref={qrRef}
+          className="mx-auto w-52 h-52 p-4 bg-white rounded flex items-center justify-center mb-4 border border-chassis-border shadow-inner"
+        >
+          <QRCodeSVG
+            value={profileConfig.websiteUrl}
+            size={176}
+            level="H"
+            includeMargin={false}
+          />
+        </div>
+
+        <p className="text-xs text-industrial-orange bg-chassis-inset border border-chassis-border py-1.5 px-3 rounded mb-4 inline-block font-mono">
+          {profileConfig.websiteUrl}
+        </p>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <button
+            onClick={handleCopy}
+            className="btn-tactile py-2.5 px-3 rounded bg-chassis-module border border-chassis-border text-industrial-paper font-semibold hover:border-chassis-highlight"
+          >
+            {copied ? "COPIED ✓" : "COPY LINK"}
+          </button>
+
+          <button
+            onClick={handleDownload}
+            className="btn-tactile py-2.5 px-3 rounded bg-chassis-module border border-industrial-orange/60 text-industrial-orange font-semibold hover:bg-chassis-hover"
+          >
+            SAVE PNG
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

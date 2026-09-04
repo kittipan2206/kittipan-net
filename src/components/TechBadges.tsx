@@ -1,37 +1,38 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
-import { Cpu } from "lucide-react";
-import { profileConfig, TechItem } from "@/config/profile";
+import { profileConfig, SystemSpec } from "@/config/profile";
 
 export function TechBadges() {
-  const { techStack } = profileConfig;
+  const { systemSpecs } = profileConfig;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.35 }}
-      className="w-full rounded-2xl p-4 bg-white/[0.02] border border-white/5 mb-8"
-    >
-      <div className="flex items-center gap-2 mb-3 px-1">
-        <Cpu className="w-4 h-4 text-cyan-400" />
-        <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-          Homelab & Tech Stack
+    <div className="w-full mb-6 chassis-box rounded p-3.5 bg-chassis-inset border border-chassis-border/80">
+      {/* Silkscreen Header */}
+      <div className="flex items-center justify-between border-b border-chassis-border/60 pb-2 mb-2.5 text-[10px] font-mono text-industrial-zinc">
+        <span className="font-bold tracking-wider uppercase flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 bg-industrial-orange inline-block" />
+          SYSTEM TOPOLOGY & INFRASTRUCTURE SPEC
         </span>
+        <span>REV // 2026.09</span>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {techStack.map((tech: TechItem) => (
-          <span
-            key={tech.name}
-            className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-mono bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-cyan-500/30 text-gray-300 hover:text-cyan-300 transition-colors"
+      {/* Grid of Technical Specs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
+        {systemSpecs.map((spec: SystemSpec) => (
+          <div
+            key={spec.key}
+            className="flex items-center justify-between py-1.5 px-2.5 rounded bg-chassis-module/70 border border-chassis-border/40 text-[11px]"
           >
-            {tech.name}
-          </span>
+            <span className="text-industrial-zinc font-semibold text-[10px]">
+              {spec.key}
+            </span>
+            <span className="text-industrial-paper font-medium">
+              {spec.value}
+            </span>
+          </div>
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 }

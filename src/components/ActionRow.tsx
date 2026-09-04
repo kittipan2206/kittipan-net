@@ -1,9 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { UserPlus, QrCode, Mail, Check } from "lucide-react";
-import confetti from "canvas-confetti";
 import { profileConfig } from "@/config/profile";
 
 interface ActionRowProps {
@@ -39,77 +36,68 @@ export function ActionRow({ onOpenQR, onNotify }: ActionRowProps) {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    // Delightful celebration effect
-    try {
-      confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.75 },
-        colors: ["#00F0FF", "#10B981", "#3B82F6", "#FFFFFF"],
-      });
-    } catch {
-      // ignore
-    }
-
-    onNotify("Contact card downloaded (.vcf)!");
+    onNotify("VCARD EXPORTED // CONTACT SAVED");
   };
 
   const handleCopyEmail = async () => {
     try {
       await navigator.clipboard.writeText(profileConfig.email);
       setCopiedEmail(true);
-      onNotify(`Copied ${profileConfig.email}`);
-      setTimeout(() => setCopiedEmail(false), 2000);
+      onNotify(`COPIED // ${profileConfig.email}`);
+      setTimeout(() => setCopiedEmail(false), 2200);
     } catch {
-      onNotify("Failed to copy email");
+      onNotify("ERROR // CLIPBOARD UNAVAILABLE");
     }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.1 }}
-      className="grid grid-cols-3 gap-2.5 w-full mb-5"
-    >
+    <div className="grid grid-cols-3 gap-2 w-full mb-6">
       {/* Save Contact (.vcf) */}
       <button
         onClick={handleDownloadVCard}
-        className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-cyan-500/40 text-gray-200 transition-all duration-200 hover:-translate-y-0.5 group"
+        className="btn-tactile flex flex-col items-center justify-center py-3 px-2 rounded bg-chassis-module border border-chassis-border text-industrial-paper text-center group cursor-pointer"
       >
-        <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 group-hover:scale-110 transition-transform">
-          <UserPlus className="w-4 h-4" />
-        </div>
-        <span className="text-[11px] font-medium tracking-tight">Save Contact</span>
+        <span className="text-[10px] font-mono text-industrial-orange mb-1 tracking-wider uppercase font-bold flex items-center gap-1">
+          <span className="w-1.5 h-1.5 bg-industrial-orange rounded-none inline-block" />
+          KEY // 01
+        </span>
+        <span className="text-xs font-mono font-semibold tracking-wide">
+          Save Contact
+        </span>
+        <span className="text-[9px] font-mono text-industrial-zinc mt-0.5">.vcf export</span>
       </button>
 
-      {/* Share / QR Code */}
+      {/* Optical QR Code */}
       <button
         onClick={onOpenQR}
-        className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-cyan-500/40 text-gray-200 transition-all duration-200 hover:-translate-y-0.5 group"
+        className="btn-tactile flex flex-col items-center justify-center py-3 px-2 rounded bg-chassis-module border border-chassis-border text-industrial-paper text-center group cursor-pointer"
       >
-        <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition-transform">
-          <QrCode className="w-4 h-4" />
-        </div>
-        <span className="text-[11px] font-medium tracking-tight">QR Code</span>
+        <span className="text-[10px] font-mono text-industrial-zinc mb-1 tracking-wider uppercase font-bold">
+          KEY // 02
+        </span>
+        <span className="text-xs font-mono font-semibold tracking-wide">
+          Scan QR Code
+        </span>
+        <span className="text-[9px] font-mono text-industrial-zinc mt-0.5">optical spec</span>
       </button>
 
       {/* Copy Email */}
       <button
         onClick={handleCopyEmail}
-        className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-cyan-500/40 text-gray-200 transition-all duration-200 hover:-translate-y-0.5 group"
+        className="btn-tactile flex flex-col items-center justify-center py-3 px-2 rounded bg-chassis-module border border-chassis-border text-industrial-paper text-center group cursor-pointer"
       >
-        <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 group-hover:scale-110 transition-transform">
+        <span className="text-[10px] font-mono text-industrial-zinc mb-1 tracking-wider uppercase font-bold">
           {copiedEmail ? (
-            <Check className="w-4 h-4 text-emerald-400" />
+            <span className="text-industrial-diode">COPIED</span>
           ) : (
-            <Mail className="w-4 h-4" />
+            "KEY // 03"
           )}
-        </div>
-        <span className="text-[11px] font-medium tracking-tight">
-          {copiedEmail ? "Copied!" : "Copy Email"}
         </span>
+        <span className="text-xs font-mono font-semibold tracking-wide">
+          {copiedEmail ? "Copied" : "Copy Email"}
+        </span>
+        <span className="text-[9px] font-mono text-industrial-zinc mt-0.5">me@kittipan.net</span>
       </button>
-    </motion.div>
+    </div>
   );
 }

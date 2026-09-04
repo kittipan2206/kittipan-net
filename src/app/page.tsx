@@ -18,57 +18,69 @@ export default function Home() {
     setToastMessage(msg);
     setTimeout(() => {
       setToastMessage(null);
-    }, 3000);
+    }, 2800);
   };
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 overflow-hidden cyber-grid">
-      {/* Dynamic ambient gradient orbs */}
-      <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[550px] h-[550px] bg-cyan-600/15 rounded-full blur-[128px] pointer-events-none" />
-      <div className="absolute top-1/3 -left-40 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[110px] pointer-events-none" />
-      <div className="absolute bottom-10 -right-40 w-[450px] h-[450px] bg-emerald-600/10 rounded-full blur-[120px] pointer-events-none" />
-
-      {/* Main card container */}
-      <div className="relative z-10 w-full max-w-md mx-auto my-auto flex flex-col items-center">
-        {/* Profile Header */}
-        <ProfileHeader />
-
-        {/* Quick Action Buttons (Save Contact, QR, Email) */}
-        <ActionRow
-          onOpenQR={() => setIsQROpen(true)}
-          onNotify={showNotification}
-        />
-
-        {/* Smart Home Portal Showcase */}
-        <div className="w-full mb-5">
-          <SmartHomeCard />
+    <main className="min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 machined-surface text-industrial-paper">
+      {/* Central Machined Hardware Chassis Frame */}
+      <div className="relative w-full max-w-xl my-auto rounded-lg bg-chassis-base border border-chassis-border p-5 sm:p-7 shadow-2xl">
+        {/* Machine Screw Fixtures (Teenage Engineering Hardware Aesthetic) */}
+        <div className="absolute top-3 left-3 text-chassis-highlight font-mono text-[10px] select-none">
+          ⨁
+        </div>
+        <div className="absolute top-3 right-3 text-chassis-highlight font-mono text-[10px] select-none">
+          ⨁
+        </div>
+        <div className="absolute bottom-3 left-3 text-chassis-highlight font-mono text-[10px] select-none">
+          ⨁
+        </div>
+        <div className="absolute bottom-3 right-3 text-chassis-highlight font-mono text-[10px] select-none">
+          ⨁
         </div>
 
-        {/* Social / Direct Links */}
-        <SocialLinks />
+        {/* Inner Panel Content */}
+        <div className="pt-2 pb-1">
+          {/* 1. Industrial Equipment Nameplate & Status */}
+          <ProfileHeader />
 
-        {/* Homelab & Tech Badges */}
-        <TechBadges />
+          {/* 2. Tactile Hardware Push Buttons */}
+          <ActionRow
+            onOpenQR={() => setIsQROpen(true)}
+            onNotify={showNotification}
+          />
 
-        {/* Footer */}
-        <footer className="w-full text-center py-4 border-t border-white/5 text-[11px] font-mono text-gray-500">
-          <p className="mb-1">
-            © {new Date().getFullYear()} {profileConfig.name} • {profileConfig.handle}
-          </p>
-          <p className="text-gray-600">
-            Powered by Next.js & Cloudflare Pages
-          </p>
-        </footer>
+          {/* 3. Dedicated Rackmount Server Node Module */}
+          <SmartHomeCard />
+
+          {/* 4. Patchbay Port Interconnects */}
+          <SocialLinks />
+
+          {/* 5. System Topology / Hardware Silkscreen Specs */}
+          <TechBadges />
+
+          {/* 6. Machine Stamped Chassis Footer */}
+          <footer className="w-full pt-4 mt-2 border-t border-chassis-border/80 flex flex-col sm:flex-row items-center justify-between text-[10px] font-mono text-industrial-zinc gap-2">
+            <div>
+              ENGINEERED // {profileConfig.name.toUpperCase()}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-industrial-orange font-bold">CF-PAGES // EDGE</span>
+              <span className="text-chassis-border">•</span>
+              <span>{profileConfig.websiteUrl.replace("https://", "")}</span>
+            </div>
+          </footer>
+        </div>
       </div>
 
-      {/* Interactive QR Code Modal */}
+      {/* Optical QR Inspection Scanner Modal */}
       <QRCodeModal
         isOpen={isQROpen}
         onClose={() => setIsQROpen(false)}
         onNotify={showNotification}
       />
 
-      {/* Toast Feedback */}
+      {/* Industrial Telemetry Toast */}
       <Toast message={toastMessage} />
     </main>
   );
