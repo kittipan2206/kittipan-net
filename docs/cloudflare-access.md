@@ -30,30 +30,12 @@ Workers & Pages → `kittipan-net` → Settings → **Variables and Secrets** (P
 
 ```json
 [
-  {
-    "code": "HA",
-    "name": "Home Assistant",
-    "sub": "home.kittipan.net",
-    "url": "https://home.kittipan.net"
-  },
-  {
-    "code": "3D",
-    "name": "Home3D",
-    "sub": "home3d.kittipan.net",
-    "url": "https://home3d.kittipan.net"
-  },
-  {
-    "code": "CF",
-    "name": "Cloudflare",
-    "sub": "DNS · Pages · Access",
-    "url": "https://dash.cloudflare.com"
-  },
-  {
-    "code": "GH",
-    "name": "GitHub",
-    "sub": "repos · actions",
-    "url": "https://github.com/kittipan2206"
-  }
+  { "code": "HA", "name": "Home Assistant", "sub": "home.kittipan.net", "url": "https://home.kittipan.net" },
+  { "code": "3D", "name": "Home3D", "sub": "home3d.kittipan.net", "url": "https://home3d.kittipan.net" },
+  { "code": "CF", "name": "Cloudflare", "sub": "DNS · Pages · Access", "url": "https://dash.cloudflare.com" },
+  { "code": "VC", "name": "Vercel", "sub": "deployments", "url": "https://vercel.com/dashboard" },
+  { "code": "SB", "name": "Supabase", "sub": "databases", "url": "https://supabase.com/dashboard" },
+  { "code": "GH", "name": "GitHub", "sub": "repos · actions", "url": "https://github.com/kittipan2206" }
 ]
 ```
 
