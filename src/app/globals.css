@@ -70,6 +70,25 @@ html[data-phase="dusk"] {
   --win-shadow: 0 4px 0 #050505, 0 30px 90px rgba(0, 0, 0, 0.35);
 }
 
+/* Accent presets (Settings → Accent). */
+html[data-accent="green"] {
+  --accent: #3fcf6e;
+  --lcd-ink: #5fd384;
+}
+html[data-accent="blue"] {
+  --accent: #2f7bff;
+  --lcd-ink: #5a9bff;
+}
+
+/* Plain wallpaper: flat chassis color instead of the sky. Declared after the phase skies so it wins. */
+html[data-wallpaper="plain"] {
+  --sky: #111210;
+}
+html[data-wallpaper="plain"][data-phase="dawn"],
+html[data-wallpaper="plain"][data-phase="day"] {
+  --sky: #e4e1d9;
+}
+
 html,
 body {
   height: 100%;
@@ -131,7 +150,7 @@ body {
     box-shadow: 0 3px 0 #161616;
   }
   .key-accent:hover {
-    background: #ff6a1f;
+    background: color-mix(in srgb, var(--accent) 85%, white);
   }
   .key-accent:active {
     box-shadow: 0 1px 0 #161616;
@@ -159,7 +178,7 @@ body {
     color: var(--lcd-ink);
     letter-spacing: 0.02em;
     line-height: 1;
-    text-shadow: 0 0 18px rgba(255, 106, 31, 0.28);
+    text-shadow: 0 0 18px color-mix(in srgb, var(--lcd-ink) 30%, transparent);
   }
 
   .caps {
@@ -236,6 +255,49 @@ body {
   }
 }
 
+/* Live wallpaper */
+.lw-star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  animation: lw-twinkle var(--d) ease-in-out var(--delay) infinite;
+}
+.lw-cloud {
+  position: absolute;
+  left: -40vw;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  filter: blur(30px);
+  animation: lw-drift var(--d) linear var(--delay) infinite;
+}
+.lw-rain {
+  position: absolute;
+  top: -20vh;
+  width: 1px;
+  height: 14vh;
+  background: linear-gradient(transparent, rgba(255, 255, 255, 0.32));
+  animation: lw-fall var(--d) linear var(--delay) infinite;
+}
+@keyframes lw-twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+@keyframes lw-drift {
+  to {
+    transform: translateX(150vw);
+  }
+}
+@keyframes lw-fall {
+  to {
+    transform: translateY(130vh);
+  }
+}
+
 @keyframes caret {
   50% {
     opacity: 0;
@@ -246,14 +308,22 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .boot-reveal {
+  .boot-reveal,
+  .lw-cloud,
+  .lw-rain {
     display: none;
+  }
+  .lw-star {
+    animation: none;
+    opacity: 0.5;
   }
   .caret {
     animation: none;
   }
 }
-html[data-motion="reduced"] .boot-reveal {
+html[data-motion="reduced"] .boot-reveal,
+html[data-motion="reduced"] .lw-cloud,
+html[data-motion="reduced"] .lw-rain {
   display: none;
 }
 html[data-motion="reduced"] *,

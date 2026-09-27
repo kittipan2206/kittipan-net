@@ -57,7 +57,7 @@ export const viewport: Viewport = {
 
 // Runs before paint: picks the lighting phase so the first frame is already day or night.
 // Approximates Bangkok sunrise/sunset (≈06:10/18:10); OS.tsx refines it with real solar math.
-const prePaint = `(function(){var d=document.documentElement;try{var p=localStorage.getItem('kos_theme');if(!p||p==='auto'){var f=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()).split(':');var t=+f[0]*60+ +f[1];p=t<325||t>1135?'night':t<415?'dawn':t<1045?'day':'dusk';}d.dataset.phase=p;if(localStorage.getItem('kos_motion')==='reduced')d.dataset.motion='reduced';}catch(e){d.dataset.phase='night';}})();`;
+const prePaint = `(function(){var d=document.documentElement;try{var p=localStorage.getItem('kos_theme');if(!p||p==='auto'){var f=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()).split(':');var t=+f[0]*60+ +f[1];p=t<325||t>1135?'night':t<415?'dawn':t<1045?'day':'dusk';}d.dataset.phase=p;var a=localStorage.getItem('kos_accent');if(a)d.dataset.accent=a;var w=localStorage.getItem('kos_wallpaper');if(w)d.dataset.wallpaper=w;if(localStorage.getItem('kos_motion')==='reduced')d.dataset.motion='reduced';}catch(e){d.dataset.phase='night';}})();`;
 
 export default function RootLayout({
   children,

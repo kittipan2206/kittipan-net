@@ -34,7 +34,7 @@ export const APPS: AppMeta[] = [
     title: "Projects",
     file: "projects.app",
     icon: Folder,
-    frame: { x: 200, y: 110, w: 640, h: 440 },
+    frame: { x: 190, y: 70, w: 780, h: 640 },
   },
   {
     id: "terminal",
@@ -55,7 +55,7 @@ export const APPS: AppMeta[] = [
     title: "Settings",
     file: "settings.app",
     icon: Settings,
-    frame: { x: 280, y: 120, w: 540, h: 560 },
+    frame: { x: 260, y: 70, w: 640, h: 660 },
   },
   {
     id: "launchpad",

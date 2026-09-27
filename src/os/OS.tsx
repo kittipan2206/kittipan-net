@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ComponentType } from "react";
+import { useEffect, useRef, useState, type ComponentType, type MouseEvent } from "react";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import {
   ChevronLeft,
@@ -19,6 +19,10 @@ import { bangkokDate, bangkokTime } from "./sun";
 import { ClockWidget, NowWidget, WeatherWidget } from "./widgets";
 import { Window } from "./Window";
 import { Spotlight } from "./Spotlight";
+import { ContextMenu } from "./ContextMenu";
+import { LiveWallpaper } from "./LiveWallpaper";
+import { Screensaver } from "./Screensaver";
+import { VERSION, VERSION_LABEL } from "./version";
 import { Key, Logo } from "./ui";
 import { About } from "./apps/About";
 import { Contact } from "./apps/Contact";
@@ -149,6 +153,7 @@ function Dock() {
           >
             <Key
               aria-label={app.title}
+              data-dock-key={app.id}
               onClick={() => {
                 const top = [...state.windows]
                   .filter((w) => !w.minimized)
@@ -182,12 +187,22 @@ function Dock() {
 
 function DesktopShell() {
   const { state, open } = useOS();
+  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
   const visible = state.windows.filter((w) => !w.minimized);
+  const minimized = state.windows.filter((w) => w.minimized).map((w) => w.id);
   const topZ = Math.max(0, ...visible.map((w) => w.z));
 
+  // Right-click on bare desktop only; windows, widgets and bars keep the browser menu.
+  const onContextMenu = (e: MouseEvent) => {
+    if ((e.target as HTMLElement).closest("section, aside, nav, header, input, a")) return;
+    e.preventDefault();
+    setMenu({ x: e.clientX, y: e.clientY });
+  };
+
   return (
-    <div className="wallpaper fixed inset-0 hidden overflow-hidden md:block">
+    <div className="wallpaper fixed inset-0 hidden overflow-hidden md:block" onContextMenu={onContextMenu}>
       <div className="dots absolute inset-0" aria-hidden />
+      <LiveWallpaper />
       <MenuBar />
       <nav
         aria-label="Desktop"
@@ -213,7 +228,7 @@ function DesktopShell() {
         ))}
       </nav>
       <main>
-        <AnimatePresence>
+        <AnimatePresence custom={minimized}>
           {visible.map((w) => {
             const View = VIEWS[w.id];
             return (
@@ -233,12 +248,14 @@ function DesktopShell() {
         <NowWidget />
       </aside>
       <Dock />
+      {menu && <ContextMenu x={menu.x} y={menu.y} onClose={() => setMenu(null)} />}
     </div>
   );
 }
 
 function MobileShell() {
-  const { state, open, closeTop } = useOS();
+  const { state, open, closeTop, dispatch } = useOS();
+  const pull = useRef<{ y: number; fired: boolean } | null>(null);
   const app = state.mobileApp ? appById(state.mobileApp) : null;
   const View = app ? VIEWS[app.id] : null;
   const dockApps = APPS.filter((a) =>
@@ -248,7 +265,22 @@ function MobileShell() {
   return (
     <div className="wallpaper fixed inset-0 overflow-hidden md:hidden">
       <div className="dots absolute inset-0" aria-hidden />
-      <div className="scroll-quiet relative flex h-full flex-col gap-3.5 overflow-y-auto px-4 pb-[120px] pt-[max(env(safe-area-inset-top),0px)]">
+      <LiveWallpaper />
+      <div
+        // Pull down from the top of the home screen to open Spotlight, like iOS search.
+        onTouchStart={(e) => {
+          pull.current = e.currentTarget.scrollTop <= 0 ? { y: e.touches[0].clientY, fired: false } : null;
+        }}
+        onTouchMove={(e) => {
+          const p = pull.current;
+          if (!p || p.fired || e.touches[0].clientY - p.y < 70) return;
+          p.fired = true;
+          sound.playMechanicalClick();
+          dispatch({ type: "spotlight", open: true });
+        }}
+        onTouchEnd={() => (pull.current = null)}
+        className="scroll-quiet relative flex h-full flex-col gap-3.5 overflow-y-auto overscroll-contain px-4 pb-[120px] pt-[max(env(safe-area-inset-top),0px)]"
+      >
         <header className="flex h-[52px] shrink-0 items-center justify-between font-mono text-xs text-label">
           <div className="flex items-center gap-2 font-semibold">
             <Logo size={18} />
@@ -256,6 +288,7 @@ function MobileShell() {
           </div>
           <MobileTopControls />
         </header>
+        <span className="caps -mb-2 -mt-2 text-center text-label opacity-60">↓ pull to search</span>
         <ClockWidget compact />
         <div className="grid grid-cols-2 gap-3">
           <WeatherWidget compact />
@@ -445,14 +478,14 @@ function BootReveal() {
 }
 
 const POST_LINES = [
-  "KS-BIOS v2.0 · (c) kittipan.net",
+  `KS-BIOS v${VERSION} · (c) kittipan.net`,
   "CPU: human, 1 core, caffeinated",
   "Memory test ........................ OK",
   "Detecting location ........... Bangkok 13.75N 100.50E",
   "Mounting /apps ..................... 6 found",
   "Checking owner session ............. locked",
   "Syncing lighting with the sun ...... OK",
-  "Starting kittipan OS",
+  `Starting kittipan OS ${VERSION_LABEL}`,
 ];
 
 function Reboot() {
@@ -535,6 +568,7 @@ export function OS() {
         <MobileShell />
         <AnimatePresence>{state.spotlight && <Spotlight />}</AnimatePresence>
         <Toast />
+        <Screensaver />
         {state.rebooting && <Reboot />}
         <BootReveal />
       </MotionConfig>

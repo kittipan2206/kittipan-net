@@ -1,13 +1,14 @@
 {
   "name": "kittipan-net",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "check": "node --no-warnings scripts/selfcheck.mts"
+    "check": "node --no-warnings scripts/selfcheck.mts",
+    "release": "node scripts/release.mjs"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

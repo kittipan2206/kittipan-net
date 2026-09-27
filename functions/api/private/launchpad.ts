@@ -36,6 +36,12 @@ const json = (status: number, body: unknown) =>
     },
   });
 
+/** Accepts "team.cloudflareaccess.com", "https://team.cloudflareaccess.com/", etc. → "https://team.cloudflareaccess.com". */
+export function normalizeTeamDomain(value: string): string {
+  const trimmed = value.trim();
+  return new URL(trimmed.includes("://") ? trimmed : `https://${trimmed}`).origin;
+}
+
 export function validateClaims(
   claims: Claims,
   expected: { aud: string; iss: string; now: number },
@@ -125,18 +131,25 @@ export async function onRequestGet({
   request: Request;
   env: Env;
 }): Promise<Response> {
-  const { ACCESS_TEAM_DOMAIN, ACCESS_AUD, LAUNCHPAD_LINKS } = env;
-  if (!ACCESS_TEAM_DOMAIN || !ACCESS_AUD)
-    return json(503, { error: "owner mode is not configured" });
+  const { ACCESS_AUD, LAUNCHPAD_LINKS } = env;
+  if (!env.ACCESS_TEAM_DOMAIN || !ACCESS_AUD) return json(503, { error: "owner mode is not configured" });
+
+  let ACCESS_TEAM_DOMAIN: string;
+  try {
+    ACCESS_TEAM_DOMAIN = normalizeTeamDomain(env.ACCESS_TEAM_DOMAIN);
+  } catch {
+    return json(500, { error: "ACCESS_TEAM_DOMAIN is not a valid domain" });
+  }
 
   const token = readToken(request);
   if (!token) return json(401, { error: "unauthorized" });
 
   let claims: Claims | null = null;
   try {
-    claims = await verifyAccessJwt(token, { ACCESS_TEAM_DOMAIN, ACCESS_AUD });
-  } catch {
-    return json(502, { error: "could not verify identity" });
+    claims = await verifyAccessJwt(token, { ACCESS_TEAM_DOMAIN, ACCESS_AUD: ACCESS_AUD.trim() });
+  } catch (err) {
+    // 500, not 502: Cloudflare swaps 502 bodies for its own error page on the custom domain.
+    return json(500, { error: "could not verify identity", detail: err instanceof Error ? err.message : String(err) });
   }
   if (!claims) return json(401, { error: "unauthorized" });
 

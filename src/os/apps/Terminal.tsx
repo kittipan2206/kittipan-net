@@ -9,7 +9,8 @@ import { useOS } from "../state";
 import { useWeather } from "../hooks";
 import { bangkokTime } from "../sun";
 import { describe } from "../weather";
-import { runCommand, type Line } from "../terminal";
+import { complete, runCommand, type Line } from "../terminal";
+import { VERSION_LABEL } from "../version";
 import { unlockUrl } from "../state";
 
 const BANNER: Line[] = [
@@ -22,14 +23,14 @@ type Entry = { kind: "input"; text: string } | { kind: "output"; line: Line };
 const toneClass: Record<NonNullable<Line["tone"]>, string> = {
   out: "text-[#d9d5cb]",
   muted: "text-[#8c897f]",
-  accent: "text-[#ff6a1f]",
-  error: "text-[#ff6a1f]",
+  accent: "text-lcd-ink",
+  error: "text-lcd-ink",
 };
 
 function Prompt({ owner }: { owner: boolean }) {
   return (
     <span aria-hidden className="whitespace-nowrap">
-      <span className="text-[#ff6a1f]">
+      <span className="text-lcd-ink">
         {owner ? "kittipan" : "guest"}@kittipan-os
       </span>
       <span className="text-[#6b6962]">:~$ </span>
@@ -70,6 +71,7 @@ export function Terminal() {
         ? `${weather.temp}°C · ${pick(describe(weather.code), state.lang)} · Bangkok`
         : null,
       uptimeSeconds: Math.round((Date.now() - bootedAt) / 1000),
+      version: VERSION_LABEL,
     });
 
     let next: Entry[] = [
@@ -86,6 +88,7 @@ export function Terminal() {
       if (effect.type === "theme") os.setTheme(effect.value);
       if (effect.type === "sound") os.setSound(effect.on);
       if (effect.type === "reboot") os.dispatch({ type: "reboot", on: true });
+      if (effect.type === "screensaver") window.dispatchEvent(new Event("kos:screensaver"));
       if (effect.type === "unlock")
         setTimeout(() => (location.href = unlockUrl), 400);
     }
@@ -96,7 +99,13 @@ export function Terminal() {
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const { value, options } = complete(input, APPS.map((a) => a.id));
+      if (value !== input) setInput(value);
+      else if (options.length > 1)
+        setEntries((prev) => [...prev, { kind: "input", text: input }, { kind: "output", line: { text: options.join("   "), tone: "muted" } }]);
+    } else if (e.key === "Enter") {
       sound.playMechanicalClick();
       submit();
     } else if (e.key === "ArrowUp") {
@@ -158,7 +167,7 @@ export function Terminal() {
           autoCorrect="off"
           spellCheck={false}
           enterKeyHint="send"
-          className="min-w-0 grow border-0 bg-transparent p-0 font-mono text-[16px] text-[#edebe5] caret-[#ff6a1f] outline-none focus-visible:outline-none sm:text-sm"
+          className="min-w-0 grow border-0 bg-transparent p-0 font-mono text-[16px] text-[#edebe5] caret-[var(--lcd-ink)] outline-none focus-visible:outline-none sm:text-sm"
         />
       </label>
     </div>

@@ -118,6 +118,12 @@ functions/api/private/launchpad.ts   Access-verified endpoint
 scripts/selfcheck.mts                  node assert checks for sun.ts + terminal.ts
 ```
 
+## Versioning
+
+- `package.json` `version` is the single source of truth (SemVer). `next.config.mjs` injects it plus the commit (`CF_PAGES_COMMIT_SHA` or local git) and build date as `NEXT_PUBLIC_*`; read them via `src/os/version.ts`.
+- Shown in Settings → System, Terminal `version` / `neofetch`, and the `reboot` POST screen.
+- Log changes under `## [Unreleased]` in `CHANGELOG.md`; `npm run release -- <patch|minor|major>` bumps, dates the section, commits and tags `vX.Y.Z`.
+
 ## Done when
 
 - `npm run build` passes and `out/` contains no private strings.
