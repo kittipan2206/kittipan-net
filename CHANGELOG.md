@@ -5,6 +5,16 @@ Add entries under **Unreleased** as you work, then run `npm run release -- <patc
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-09-27
+
+### Added
+- Arrange the desktop: drag icons anywhere; they snap to a grid with a springy landing and a dashed drop target, tilt with drag speed, and the layout is remembered.
+- Marquee selection on empty desktop and ⌘/Shift-click to select several icons, then move them together.
+- Single click selects, double-click (or Enter) opens — like a real desktop. The dock still opens on one click.
+- Trash: drag icons onto it (it lights up and wiggles), they get swallowed with a crunch… and pop back out with a quip. Delete/Backspace works too. Double-click Trash to see every escape attempt.
+- Right-click desktop: "Clean up icons" and "Sort icons by name".
+
+
 ## [3.0.1] - 2026-09-27
 
 ### Fixed

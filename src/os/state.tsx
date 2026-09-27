@@ -67,6 +67,8 @@ export interface OSState extends Prefs {
   festival: Festival | null;
   /** set from Terminal `festival <name|off>` for this session; null = follow the calendar */
   festivalOverride: Festival | "off" | null;
+  /** apps visitors tried to throw away this session (they always come back) */
+  trashLog: { id: AppId; at: number }[];
   owner: {
     status: OwnerStatus;
     email?: string | null;
@@ -102,6 +104,7 @@ type Action =
   | { type: "prefs"; patch: Partial<Prefs> }
   | { type: "phase"; phase: Phase }
   | { type: "festival"; festival: Festival | null }
+  | { type: "trashed"; ids: AppId[] }
   | { type: "festivalOverride"; value: Festival | "off" | null }
   | { type: "owner"; owner: OSState["owner"] }
   | { type: "spotlight"; open: boolean }
@@ -136,6 +139,7 @@ const initialState: OSState = {
   phase: "night",
   festival: null,
   festivalOverride: null,
+  trashLog: [],
   owner: { status: "unknown" },
   spotlight: false,
   rebooting: false,
@@ -239,6 +243,8 @@ function reducer(state: OSState, action: Action): OSState {
         : { ...state, phase: action.phase };
     case "festival":
       return state.festival === action.festival ? state : { ...state, festival: action.festival };
+    case "trashed":
+      return { ...state, trashLog: [...state.trashLog, ...action.ids.map((id) => ({ id, at: Date.now() }))] };
     case "festivalOverride":
       return { ...state, festivalOverride: action.value };
     case "owner":

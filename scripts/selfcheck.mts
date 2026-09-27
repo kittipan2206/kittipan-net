@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { phaseAt, sunTimes, sunProgress, bangkokTime, shadowOffset } from "../src/os/sun.ts";
 import { festivalOn } from "../src/os/festival.ts";
 import { newGame, step, turn } from "../src/os/snake.ts";
+import { defaultLayout, gridFor, moveIcons, resolveLayout, sortLayout } from "../src/os/desktop.ts";
 import { complete, runCommand, type TerminalContext } from "../src/os/terminal.ts";
 import { normalizeTeamDomain, validateClaims } from "../functions/api/private/launchpad.ts";
 
@@ -51,6 +52,26 @@ assert.equal(g.snake.length, 4);
 let wall = newGame(10, 8, fixed);
 for (let i = 0; i < 10; i++) wall = step(wall, fixed);
 assert.equal(wall.alive, false);
+
+// Desktop icons
+const grid = gridFor(1440, 900); // 11 cols × 7 rows with the widget column reserved
+assert.deepEqual(grid, { cols: 11, rows: 7 });
+const ids = ["about", "projects", "terminal", "contact", "settings", "launchpad", "trash"];
+const lay = defaultLayout(ids, grid);
+assert.deepEqual(lay.about, { c: 0, r: 0 });
+assert.deepEqual(lay.launchpad, { c: 0, r: 5 });
+assert.deepEqual(lay.trash, { c: 10, r: 6 });
+const moved = moveIcons(lay, ["about", "projects"], { c: 3, r: 0 }, grid);
+assert.deepEqual([moved.about, moved.projects], [{ c: 3, r: 0 }, { c: 3, r: 1 }]);
+const blocked = moveIcons(lay, ["about"], { c: 0, r: 1 }, grid); // projects sits there
+assert.notDeepEqual(blocked.about, lay.projects);
+assert.equal(new Set(Object.values(blocked).map((x) => `${x.c},${x.r}`)).size, ids.length);
+const small = resolveLayout({ ...lay, trash: { c: 10, r: 6 } }, ids, gridFor(900, 600));
+assert.ok(Object.values(small).every((x) => x.c < gridFor(900, 600).cols && x.r < gridFor(900, 600).rows));
+assert.equal(new Set(Object.values(small).map((x) => `${x.c},${x.r}`)).size, ids.length);
+const sorted = sortLayout(moved, { about: "About", projects: "Projects", terminal: "Terminal", contact: "Contact", settings: "Settings", launchpad: "Launchpad", trash: "Trash" }, grid);
+assert.deepEqual(sorted.contact, { c: 0, r: 1 });
+assert.deepEqual(sorted.trash, lay.trash);
 
 // Terminal
 const ctx: TerminalContext = {

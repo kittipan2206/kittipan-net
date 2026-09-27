@@ -1,5 +1,6 @@
 import {
   Gamepad2,
+  Trash2,
   Contact,
   Folder,
   LayoutGrid,
@@ -9,7 +10,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-export type AppId = "about" | "projects" | "terminal" | "contact" | "settings" | "launchpad" | "snake";
+export type AppId = "about" | "projects" | "terminal" | "contact" | "settings" | "launchpad" | "snake" | "trash";
 
 export interface AppMeta {
   id: AppId;
@@ -73,6 +74,14 @@ export const APPS: AppMeta[] = [
     file: "snake.app",
     icon: Gamepad2,
     frame: { x: 320, y: 90, w: 520, h: 500 },
+    hidden: true,
+  },
+  {
+    id: "trash",
+    title: "Trash",
+    file: "trash",
+    icon: Trash2,
+    frame: { x: 420, y: 140, w: 440, h: 380 },
     hidden: true,
   },
 ];

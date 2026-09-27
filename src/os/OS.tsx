@@ -31,6 +31,8 @@ import { Projects } from "./apps/Projects";
 import { Settings } from "./apps/Settings";
 import { Terminal } from "./apps/Terminal";
 import { Snake } from "./apps/Snake";
+import { Trash } from "./apps/Trash";
+import { DesktopIcons } from "./DesktopIcons";
 import { Cursor } from "./Cursor";
 import { FestivalLayer } from "./FestivalLayer";
 import { FESTIVAL_GREETING } from "./festival";
@@ -43,6 +45,7 @@ const VIEWS: Record<AppId, ComponentType> = {
   settings: Settings,
   launchpad: Launchpad,
   snake: Snake,
+  trash: Trash,
 };
 
 function AppIcon({ app, size = 22 }: { app: AppMeta; size?: number }) {
@@ -211,29 +214,7 @@ function DesktopShell() {
       <LiveWallpaper />
       <FestivalLayer />
       <MenuBar />
-      <nav
-        aria-label="Desktop"
-        className="absolute left-5 top-16 z-[5] flex w-[88px] flex-col gap-[18px]"
-      >
-        {APPS.filter((a) => !a.hidden).map((app) => (
-          <button
-            key={app.id}
-            type="button"
-            onClick={() => {
-              sound.playMechanicalClick();
-              open(app.id);
-            }}
-            className="group flex flex-col items-center gap-[7px] text-label"
-          >
-            <span className="key flex size-[52px] items-center justify-center group-active:translate-y-[2px] group-active:shadow-[var(--shadow-pressed)]">
-              <AppIcon app={app} />
-            </span>
-            <span className="font-mono text-[11px] font-medium [text-shadow:0_1px_0_rgba(0,0,0,0.15)]">
-              {app.title}
-            </span>
-          </button>
-        ))}
-      </nav>
+      <DesktopIcons />
       <main>
         <AnimatePresence custom={minimized}>
           {visible.map((w) => {

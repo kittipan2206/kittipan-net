@@ -80,7 +80,7 @@ export function ContextMenu({
   };
 
   const left = Math.min(x, window.innerWidth - 236);
-  const top = Math.min(y, window.innerHeight - 420);
+  const top = Math.min(y, window.innerHeight - 480);
 
   return (
     <div
@@ -114,6 +114,8 @@ export function ContextMenu({
       >
         Live wallpaper
       </Item>
+      <Item onSelect={run(() => window.dispatchEvent(new CustomEvent("kos:icons", { detail: "cleanup" })))}>Clean up icons</Item>
+      <Item onSelect={run(() => window.dispatchEvent(new CustomEvent("kos:icons", { detail: "sort" })))}>Sort icons by name</Item>
       <Item
         onSelect={run(() => window.dispatchEvent(new Event("kos:screensaver")))}
       >

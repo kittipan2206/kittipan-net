@@ -166,6 +166,59 @@ class SoundEngine {
       // Ignore audio error
     }
   }
+
+  // Paper crunch: a short burst of low-passed noise that falls in pitch.
+  public playCrunch() {
+    if (!this.isEnabled()) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      const t = ctx.currentTime;
+      const len = Math.floor(ctx.sampleRate * 0.22);
+      const buffer = ctx.createBuffer(1, len, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (Math.random() > 0.6 ? 1 : 0.25) * (1 - i / len);
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      const lp = ctx.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.setValueAtTime(2400, t);
+      lp.frequency.exponentialRampToValueAtTime(500, t + 0.22);
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.3, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      src.connect(lp);
+      lp.connect(gain);
+      gain.connect(ctx.destination);
+      src.start(t);
+    } catch {
+      // Ignore audio error
+    }
+  }
+
+  // Springy "boing" when something pops back out.
+  public playPop() {
+    if (!this.isEnabled()) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(220, t);
+      osc.frequency.exponentialRampToValueAtTime(880, t + 0.09);
+      osc.frequency.exponentialRampToValueAtTime(520, t + 0.2);
+      gain.gain.setValueAtTime(0.18, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.25);
+    } catch {
+      // Ignore audio error
+    }
+  }
 }
 
 export const sound = new SoundEngine();
