@@ -5,6 +5,19 @@ Add entries under **Unreleased** as you work, then run `npm run release -- <patc
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-09-27
+
+### Added
+- Files on the desktop: notes (`.txt`), folders and images, stored only in the visitor's browser.
+- Starter files you can delete right away: `readme.txt`, `todo.txt`, `kittipan-os-v2.jpg` and an `Old site` folder with a bit of lore.
+- Notes app (autosave, rename, word count), Folder window (new note/folder, move to desktop, delete), Preview for images.
+- Right-click desktop → New Note / New Folder (lands where you clicked, name ready to type). Right-click an icon → Open / Rename / Move to Trash. F2 renames.
+- Drag files onto a folder to move them in.
+- Real Trash: files go in and stay until you Put Back, Delete Now or Empty Trash (with confirmation). Folders take their contents with them. Apps still bounce back.
+- Terminal: `ls files`, `cat`, `rm` (to Trash), `touch`.
+- Settings → Reset desktop & files.
+
+
 ## [3.1.0] - 2026-09-27
 
 ### Added

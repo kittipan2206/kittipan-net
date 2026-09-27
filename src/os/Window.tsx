@@ -68,8 +68,11 @@ export function Window({
   focused: boolean;
   children: ReactNode;
 }) {
-  const { dispatch, close } = useOS();
+  const { dispatch, close, state } = useOS();
   const app = appById(win.id);
+  // Document windows (Notes, Folder, Preview) show the open file's name.
+  const docId = state.docs[win.id as keyof typeof state.docs];
+  const title = (docId && state.fs[docId]?.name) || app.file;
   const gesture = useRef<{
     g: Gesture;
     px: number;
@@ -213,7 +216,7 @@ export function Window({
   return (
     <>
       <motion.section
-        aria-label={app.file}
+        aria-label={title}
         variants={variants}
         initial="hidden"
         animate="shown"
@@ -270,7 +273,7 @@ export function Window({
               !focused && "opacity-60",
             )}
           >
-            {app.file}
+            {title}
           </span>
           <span className="w-[51px] text-right text-[11px] opacity-50">
             {app.ownerOnly ? "private" : ""}

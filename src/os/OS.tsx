@@ -31,7 +31,7 @@ import { Projects } from "./apps/Projects";
 import { Settings } from "./apps/Settings";
 import { Terminal } from "./apps/Terminal";
 import { Snake } from "./apps/Snake";
-import { Trash } from "./apps/Trash";
+import { Folder, Notes, Preview, Trash } from "./apps/Files";
 import { DesktopIcons } from "./DesktopIcons";
 import { Cursor } from "./Cursor";
 import { FestivalLayer } from "./FestivalLayer";
@@ -46,6 +46,9 @@ const VIEWS: Record<AppId, ComponentType> = {
   launchpad: Launchpad,
   snake: Snake,
   trash: Trash,
+  notes: Notes,
+  folder: Folder,
+  preview: Preview,
 };
 
 function AppIcon({ app, size = 22 }: { app: AppMeta; size?: number }) {

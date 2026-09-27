@@ -11,6 +11,7 @@ import { bangkokTime } from "../sun";
 import { describe } from "../weather";
 import { complete, runCommand, type Line } from "../terminal";
 import { VERSION_LABEL } from "../version";
+import { childrenOf, create, toTrash } from "../files";
 import { unlockUrl } from "../state";
 
 const BANNER: Line[] = [
@@ -72,6 +73,7 @@ export function Terminal() {
         : null,
       uptimeSeconds: Math.round((Date.now() - bootedAt) / 1000),
       version: VERSION_LABEL,
+      files: childrenOf(state.fs, null).map((f) => ({ name: f.name, kind: f.kind, content: f.content })),
     });
 
     let next: Entry[] = [
@@ -88,6 +90,11 @@ export function Terminal() {
       if (effect.type === "theme") os.setTheme(effect.value);
       if (effect.type === "sound") os.setSound(effect.on);
       if (effect.type === "reboot") os.dispatch({ type: "reboot", on: true });
+      if (effect.type === "rm") {
+        const target = childrenOf(state.fs, null).find((f) => f.name === effect.name);
+        if (target) os.fsApply((fs) => toTrash(fs, [target.id]));
+      }
+      if (effect.type === "touch") os.fsApply((fs) => create(fs, "note", null, effect.name.includes(".") ? effect.name : `${effect.name}.txt`)[0]);
       if (effect.type === "festival") os.dispatch({ type: "festivalOverride", value: effect.value === "auto" ? null : effect.value });
       if (effect.type === "screensaver") window.dispatchEvent(new Event("kos:screensaver"));
       if (effect.type === "unlock")

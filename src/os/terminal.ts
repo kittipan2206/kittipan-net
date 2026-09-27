@@ -17,6 +17,8 @@ export type Effect =
   | { type: "reboot" }
   | { type: "unlock" }
   | { type: "screensaver" }
+  | { type: "rm"; name: string }
+  | { type: "touch"; name: string }
   | { type: "festival"; value: "songkran" | "loykrathong" | "newyear" | "off" | "auto" };
 
 export interface TerminalContext {
@@ -31,6 +33,8 @@ export interface TerminalContext {
   weather: string | null;
   uptimeSeconds: number;
   version: string;
+  /** files on the desktop */
+  files?: { name: string; kind: "note" | "folder" | "image"; content?: string }[];
 }
 
 export interface Result {
@@ -50,6 +54,7 @@ const HELP: Line[] = [
   { text: "  sound <on|off>    keyboard clicks" },
   { text: "  date · weather    Bangkok, right now" },
   { text: "  neofetch          system info" },
+  { text: "  ls files · cat · rm · touch   your desktop files" },
   { text: "  play snake        a game on the LCD" },
   { text: "  unlock            owner sign-in" },
   { text: "  version           build info · `changelog` for what's new" },
@@ -81,6 +86,10 @@ export function runCommand(input: string, ctx: TerminalContext): Result {
       return ok({ text: `${ctx.name} · ${ctx.role} · ${ctx.location}` });
 
     case "ls": {
+      if (arg === "files" || arg === "desktop" || arg === "~") {
+        const list = (ctx.files ?? []).map((f) => (f.kind === "folder" ? `${f.name}/` : f.name));
+        return ok({ text: list.length ? list.join("   ") : "(desktop is empty)", tone: list.length ? "out" : "muted" });
+      }
       if (arg && arg !== "apps")
         return ok({
           text: `${arg}: coming soon. for now: github.com/kittipan2206`,
@@ -198,6 +207,30 @@ export function runCommand(input: string, ctx: TerminalContext): Result {
       });
     }
 
+    case "cat": {
+      const name = raw.slice(cmdRaw.length).trim();
+      if (!name) return err("usage: cat <file>");
+      const file = (ctx.files ?? []).find((f) => f.name.toLowerCase() === name.toLowerCase());
+      if (!file) return err(`cat: ${name}: no such file`);
+      if (file.kind === "folder") return err(`cat: ${name}: is a folder`);
+      if (file.kind === "image") return ok({ text: `cat: ${name}: binary image — open it from the desktop`, tone: "muted" });
+      return ok(...(file.content ?? "").split("\n").map((text) => ({ text })));
+    }
+
+    case "rm": {
+      const name = raw.slice(cmdRaw.length).trim().replace(/^-\w+\s+/, "");
+      if (!name || name === "/" || name === "*") return ok({ text: "rm: kittipan OS is read-only for guests.", tone: "error" });
+      const file = (ctx.files ?? []).find((f) => f.name.toLowerCase() === name.toLowerCase());
+      if (!file) return err(`rm: ${name}: no such file`);
+      return fx([{ type: "rm", name: file.name }], { text: `moved ${file.name} to Trash`, tone: "muted" });
+    }
+
+    case "touch": {
+      const name = raw.slice(cmdRaw.length).trim();
+      if (!name) return err("usage: touch <name>");
+      return fx([{ type: "touch", name }], { text: `created ${name.includes(".") ? name : `${name}.txt`} on the desktop`, tone: "muted" });
+    }
+
     case "screensaver":
       return fx([{ type: "screensaver" }]);
 
@@ -217,11 +250,6 @@ export function runCommand(input: string, ctx: TerminalContext): Result {
         tone: "error",
       });
 
-    case "rm":
-      return ok({
-        text: "rm: kittipan OS is read-only for guests.",
-        tone: "error",
-      });
 
     case "hello":
     case "hi":
@@ -246,7 +274,7 @@ export function runCommand(input: string, ctx: TerminalContext): Result {
 // Tab completion: first word completes commands, the second completes that command's arguments.
 export const COMMANDS = [
   "help", "whoami", "ls", "open", "lang", "theme", "sound", "date", "weather", "neofetch",
-  "unlock", "version", "changelog", "clear", "reboot", "screensaver", "exit", "echo", "play", "festival",
+  "unlock", "version", "changelog", "clear", "reboot", "screensaver", "exit", "echo", "play", "festival", "cat", "rm", "touch",
 ];
 
 export function complete(input: string, apps: string[]): { value: string; options: string[] } {

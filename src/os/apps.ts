@@ -1,5 +1,8 @@
 import {
+  FileText,
+  FolderOpen,
   Gamepad2,
+  Image,
   Trash2,
   Contact,
   Folder,
@@ -10,7 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-export type AppId = "about" | "projects" | "terminal" | "contact" | "settings" | "launchpad" | "snake" | "trash";
+export type AppId = "about" | "projects" | "terminal" | "contact" | "settings" | "launchpad" | "snake" | "trash" | "notes" | "folder" | "preview";
 
 export interface AppMeta {
   id: AppId;
@@ -84,6 +87,9 @@ export const APPS: AppMeta[] = [
     frame: { x: 420, y: 140, w: 440, h: 380 },
     hidden: true,
   },
+  { id: "notes", title: "Notes", file: "notes", icon: FileText, frame: { x: 300, y: 80, w: 560, h: 520 }, hidden: true },
+  { id: "folder", title: "Folder", file: "folder", icon: FolderOpen, frame: { x: 250, y: 110, w: 620, h: 440 }, hidden: true },
+  { id: "preview", title: "Preview", file: "preview", icon: Image, frame: { x: 230, y: 70, w: 780, h: 580 }, hidden: true },
 ];
 
 export const appById = (id: AppId) => APPS.find((a) => a.id === id)!;

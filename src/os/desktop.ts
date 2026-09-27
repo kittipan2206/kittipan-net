@@ -45,21 +45,25 @@ export function nearestFree(want: Cell, taken: Set<string>, grid: Grid): Cell {
   return best ?? want;
 }
 
-/** Apps fill the first column top-down (wrapping right); trash sits bottom-right. */
-export function defaultLayout(ids: string[], grid: Grid, trashId = "trash"): Layout {
+/** Apps fill the first column top-down (wrapping right); files stack down the rightmost column; trash sits bottom-right. */
+export function defaultLayout(ids: string[], grid: Grid, trashId = "trash", isFile: (id: string) => boolean = () => false): Layout {
   const layout: Layout = {};
-  const apps = ids.filter((id) => id !== trashId);
-  apps.forEach((id, i) => (layout[id] = { c: Math.floor(i / grid.rows), r: i % grid.rows }));
-  if (ids.includes(trashId)) {
-    const taken = new Set(Object.values(layout).map(key));
-    layout[trashId] = nearestFree({ c: grid.cols - 1, r: grid.rows - 1 }, taken, grid);
-  }
+  const taken = new Set<string>();
+  const place = (id: string, want: Cell) => {
+    const cell = taken.has(key(want)) ? nearestFree(want, taken, grid) : want;
+    layout[id] = cell;
+    taken.add(key(cell));
+  };
+  const apps = ids.filter((id) => id !== trashId && !isFile(id));
+  apps.forEach((id, i) => place(id, { c: Math.floor(i / grid.rows), r: i % grid.rows }));
+  if (ids.includes(trashId)) place(trashId, { c: grid.cols - 1, r: grid.rows - 1 });
+  ids.filter(isFile).forEach((id, i) => place(id, { c: grid.cols - 1, r: i }));
   return layout;
 }
 
 /** Fit a saved layout into the current grid: clamp, then resolve collisions; unknown ids get defaults. */
-export function resolveLayout(saved: Layout, ids: string[], grid: Grid): Layout {
-  const fallback = defaultLayout(ids, grid);
+export function resolveLayout(saved: Layout, ids: string[], grid: Grid, isFile?: (id: string) => boolean): Layout {
+  const fallback = defaultLayout(ids, grid, "trash", isFile);
   const out: Layout = {};
   const taken = new Set<string>();
   for (const id of ids) {
