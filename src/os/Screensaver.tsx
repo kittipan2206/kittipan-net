@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useOS } from "./state";
 import { useNow } from "./hooks";
 import { bangkokDate, bangkokTime } from "./sun";
+import { LcdText } from "./ui";
 
 const IDLE_MS = { off: Infinity, "1m": 60_000, "5m": 300_000 } as const;
 const WAKE_EVENTS = [
@@ -91,9 +92,7 @@ export function Screensaver() {
         ref={clock}
         className="absolute left-0 top-0 flex flex-col items-center gap-3 will-change-transform"
       >
-        <span className="lcd-digits text-[120px]">
-          {now ? bangkokTime(now) : "--:--"}
-        </span>
+        <LcdText className="text-[120px]" text={now ? bangkokTime(now) : "--:--"} />
         <span className="caps text-[#6b6962]">
           {now ? `${bangkokDate(now)} · Bangkok` : ""}
         </span>

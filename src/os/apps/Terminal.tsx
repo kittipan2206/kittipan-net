@@ -14,7 +14,7 @@ import { VERSION_LABEL } from "../version";
 import { unlockUrl } from "../state";
 
 const BANNER: Line[] = [
-  { text: "kittipan OS 2.0 · type `help` to list commands", tone: "muted" },
+  { text: `kittipan OS ${VERSION_LABEL} · type \`help\` to list commands`, tone: "muted" },
 ];
 const bootedAt = Date.now();
 
@@ -88,6 +88,7 @@ export function Terminal() {
       if (effect.type === "theme") os.setTheme(effect.value);
       if (effect.type === "sound") os.setSound(effect.on);
       if (effect.type === "reboot") os.dispatch({ type: "reboot", on: true });
+      if (effect.type === "festival") os.dispatch({ type: "festivalOverride", value: effect.value === "auto" ? null : effect.value });
       if (effect.type === "screensaver") window.dispatchEvent(new Event("kos:screensaver"));
       if (effect.type === "unlock")
         setTimeout(() => (location.href = unlockUrl), 400);

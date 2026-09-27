@@ -57,6 +57,18 @@ export function Logo({
   );
 }
 
+/** LCD text with the unlit "8" segments glowing faintly behind it. */
+export function LcdText({ text, className }: { text: string; className?: string }) {
+  return (
+    <span className={clsx("lcd-stack", className)}>
+      <span className="lcd-digits lcd-ghost" aria-hidden>
+        {text.replace(/[0-9]/g, "8")}
+      </span>
+      <span className="lcd-digits">{text}</span>
+    </span>
+  );
+}
+
 export function Caps({
   children,
   className,

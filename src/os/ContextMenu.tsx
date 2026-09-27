@@ -80,7 +80,7 @@ export function ContextMenu({
   };
 
   const left = Math.min(x, window.innerWidth - 236);
-  const top = Math.min(y, window.innerHeight - 380);
+  const top = Math.min(y, window.innerHeight - 420);
 
   return (
     <div
@@ -94,6 +94,7 @@ export function ContextMenu({
     >
       <Item onSelect={run(() => os.open("terminal"))}>Open Terminal</Item>
       <Item onSelect={run(() => os.open("projects"))}>Open Projects</Item>
+      <Item onSelect={run(() => os.open("snake"))}>Play Snake</Item>
       <Item onSelect={run(() => os.open("settings"))}>Settings…</Item>
       <Sep />
       <div className="caps px-2.5 pb-1 pt-1.5 text-[#8c897f]">Lighting</div>

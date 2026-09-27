@@ -15,6 +15,7 @@ import { sound } from "@/lib/sound";
 import { APPS } from "./apps";
 import { copyText, downloadVCard } from "./actions";
 import { unlockUrl, useOS } from "./state";
+import { INSTALL_MESSAGE, installApp } from "./pwa";
 
 interface Item {
   id: string;
@@ -116,6 +117,13 @@ export function Spotlight() {
         hint: "theme",
         run: act(() => os.setTheme(p)),
       })),
+      {
+        id: "install",
+        group: "Actions",
+        title: "Install as app",
+        hint: "PWA",
+        run: act(async () => os.notify(INSTALL_MESSAGE[await installApp()])),
+      },
       {
         id: "reboot",
         group: "Actions",

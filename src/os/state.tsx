@@ -14,7 +14,9 @@ import type { Lang } from "@/config/profile";
 import { sound } from "@/lib/sound";
 import { APPS, appById, isAppId, type AppId } from "./apps";
 import { isMobileViewport } from "./actions";
-import { phaseAt, type Phase } from "./sun";
+import { PHASE_PROGRESS, phaseAt, shadowOffset, sunProgress, type Phase } from "./sun";
+import { festivalOn, type Festival } from "./festival";
+import { registerPWA } from "./pwa";
 
 export interface Win {
   id: AppId;
@@ -43,6 +45,7 @@ export type MotionPref = "system" | "reduced";
 export type Accent = "orange" | "green" | "blue";
 export type Wallpaper = "sky" | "plain";
 export type Screensaver = "off" | "1m" | "5m";
+export type CursorPref = "custom" | "system";
 
 export interface Prefs {
   lang: Lang;
@@ -53,6 +56,7 @@ export interface Prefs {
   wallpaper: Wallpaper;
   live: boolean;
   screensaver: Screensaver;
+  cursor: CursorPref;
 }
 
 export interface OSState extends Prefs {
@@ -60,6 +64,9 @@ export interface OSState extends Prefs {
   zTop: number;
   mobileApp: AppId | null;
   phase: Phase;
+  festival: Festival | null;
+  /** set from Terminal `festival <name|off>` for this session; null = follow the calendar */
+  festivalOverride: Festival | "off" | null;
   owner: {
     status: OwnerStatus;
     email?: string | null;
@@ -94,6 +101,8 @@ type Action =
   | { type: "closeMobile" }
   | { type: "prefs"; patch: Partial<Prefs> }
   | { type: "phase"; phase: Phase }
+  | { type: "festival"; festival: Festival | null }
+  | { type: "festivalOverride"; value: Festival | "off" | null }
   | { type: "owner"; owner: OSState["owner"] }
   | { type: "spotlight"; open: boolean }
   | { type: "reboot"; on: boolean }
@@ -108,6 +117,7 @@ export const DEFAULT_PREFS: Prefs = {
   wallpaper: "sky",
   live: true,
   screensaver: "1m",
+  cursor: "custom",
 };
 
 const initialState: OSState = {
@@ -124,6 +134,8 @@ const initialState: OSState = {
   zTop: 1,
   mobileApp: null,
   phase: "night",
+  festival: null,
+  festivalOverride: null,
   owner: { status: "unknown" },
   spotlight: false,
   rebooting: false,
@@ -225,6 +237,10 @@ function reducer(state: OSState, action: Action): OSState {
       return state.phase === action.phase
         ? state
         : { ...state, phase: action.phase };
+    case "festival":
+      return state.festival === action.festival ? state : { ...state, festival: action.festival };
+    case "festivalOverride":
+      return { ...state, festivalOverride: action.value };
     case "owner":
       return { ...state, owner: action.owner };
     case "spotlight":
@@ -440,6 +456,7 @@ export function useOSStore() {
     if (isAppId(hash))
       dispatch({ type: "open", id: hash, viewport: viewport() });
     if (read(STORE.ownerHint)) probeOwner();
+    registerPWA();
   }, [probeOwner]);
 
   // Remember window layout (desktop) across visits.
@@ -453,11 +470,8 @@ export function useOSStore() {
   }, [state.windows, state.zTop]);
 
   useEffect(() => {
-    write(
-      STORE.prefs,
-      JSON.stringify({ live: state.live, screensaver: state.screensaver }),
-    );
-  }, [state.live, state.screensaver]);
+    write(STORE.prefs, JSON.stringify({ live: state.live, screensaver: state.screensaver, cursor: state.cursor }));
+  }, [state.live, state.screensaver, state.cursor]);
 
   useEffect(() => {
     const fit = () => dispatch({ type: "fitAll", viewport: viewport() });
@@ -465,18 +479,22 @@ export function useOSStore() {
     return () => window.removeEventListener("resize", fit);
   }, []);
 
-  // Lighting follows the real sun unless overridden.
+  // Lighting, shadow angle and festivals follow the real sun and calendar unless overridden.
   useEffect(() => {
-    const update = () =>
-      dispatch({
-        type: "phase",
-        phase:
-          state.themePref === "auto" ? phaseAt(new Date()) : state.themePref,
-      });
+    const update = () => {
+      const now = new Date();
+      const phase = state.themePref === "auto" ? phaseAt(now) : state.themePref;
+      dispatch({ type: "phase", phase });
+      const { x, y } = shadowOffset(state.themePref === "auto" ? sunProgress(now) : PHASE_PROGRESS[phase]);
+      document.documentElement.style.setProperty("--sx", `${x}px`);
+      document.documentElement.style.setProperty("--sy", `${y}px`);
+      const o = state.festivalOverride;
+      dispatch({ type: "festival", festival: o === "off" ? null : (o ?? festivalOn(now)) });
+    };
     update();
     const timer = setInterval(update, 60_000);
     return () => clearInterval(timer);
-  }, [state.themePref]);
+  }, [state.themePref, state.festivalOverride]);
 
   useEffect(() => {
     const root = document.documentElement;

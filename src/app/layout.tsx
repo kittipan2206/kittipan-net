@@ -45,7 +45,9 @@ export const metadata: Metadata = {
     description,
     images: ["/og.png"],
   },
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: "/favicon.svg", apple: "/apple-touch-icon.png" },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: "kittipan OS", statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = {

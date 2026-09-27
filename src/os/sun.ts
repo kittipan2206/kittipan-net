@@ -81,3 +81,12 @@ export function bangkokDate(date: Date) {
   );
   return `${parts.weekday} ${parts.day} ${parts.month}`.toUpperCase();
 }
+
+/** Hard-shadow offset (px) for a sun position: long and to the west at dawn, short at noon, east at dusk. */
+export function shadowOffset(progress: number | null): { x: number; y: number } {
+  if (progress === null) return { x: 0, y: 3 };
+  const tilt = 0.5 - progress; // +0.5 at sunrise … -0.5 at sunset
+  return { x: Math.round(tilt * 10), y: 3 + Math.round(Math.abs(tilt) * 2) };
+}
+
+export const PHASE_PROGRESS: Record<Phase, number | null> = { dawn: 0.04, day: 0.5, dusk: 0.96, night: null };

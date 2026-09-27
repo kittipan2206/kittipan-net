@@ -1,4 +1,5 @@
 import {
+  Gamepad2,
   Contact,
   Folder,
   LayoutGrid,
@@ -8,8 +9,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-export type AppId =
-  "about" | "projects" | "terminal" | "contact" | "settings" | "launchpad";
+export type AppId = "about" | "projects" | "terminal" | "contact" | "settings" | "launchpad" | "snake";
 
 export interface AppMeta {
   id: AppId;
@@ -19,6 +19,8 @@ export interface AppMeta {
   /** preferred window frame on desktop */
   frame: { x: number; y: number; w: number; h: number };
   ownerOnly?: boolean;
+  /** kept off the desktop icons and dock; reachable via Terminal, Spotlight, the context menu and the mobile grid */
+  hidden?: boolean;
 }
 
 export const APPS: AppMeta[] = [
@@ -64,6 +66,14 @@ export const APPS: AppMeta[] = [
     icon: LayoutGrid,
     frame: { x: 230, y: 90, w: 900, h: 520 },
     ownerOnly: true,
+  },
+  {
+    id: "snake",
+    title: "Snake",
+    file: "snake.app",
+    icon: Gamepad2,
+    frame: { x: 320, y: 90, w: 520, h: 500 },
+    hidden: true,
   },
 ];
 

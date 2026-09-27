@@ -78,26 +78,32 @@ export function Window({
   } | null>(null);
   const [snap, setSnap] = useState<Snap>(null);
 
+  // Windows power on like a CRT: a bright horizontal line opens up, then settles. Closing collapses it back.
   const variants: Variants = {
-    hidden: () =>
-      win.fromDock ? dockPose(win) : { opacity: 0, scale: 0.97, y: 6 },
-    shown: {
-      opacity: 1,
-      scale: 1,
-      x: 0,
-      y: 0,
-      transition: { duration: win.fromDock ? 0.26 : 0.14, ease: EASE },
-    },
+    hidden: () => (win.fromDock ? dockPose(win) : { opacity: 0, scaleX: 0.5, scaleY: 0.012, filter: "brightness(2.2)" }),
+    shown: win.fromDock
+      ? { opacity: 1, scale: 1, scaleX: 1, scaleY: 1, x: 0, y: 0, filter: "brightness(1)", transition: { duration: 0.26, ease: EASE } }
+      : {
+          opacity: [0, 1, 1],
+          scaleX: [0.5, 1, 1],
+          scaleY: [0.012, 0.012, 1],
+          filter: ["brightness(2.2)", "brightness(1.8)", "brightness(1)"],
+          x: 0,
+          y: 0,
+          transition: { duration: 0.34, times: [0, 0.38, 1], ease: EASE },
+        },
     gone: (minimized: AppId[] | undefined) =>
       minimized?.includes(win.id)
         ? dockPose(win)
         : {
-            opacity: 0,
-            scale: 0.97,
-            y: 6,
-            transition: { duration: 0.14, ease: EASE },
+            scaleY: [1, 0.012, 0.012],
+            scaleX: [1, 1, 0],
+            opacity: [1, 1, 0],
+            filter: ["brightness(1)", "brightness(2)", "brightness(2.4)"],
+            transition: { duration: 0.28, times: [0, 0.55, 1], ease: EASE },
           },
   };
+
 
   const begin = (g: Gesture) => (e: PointerEvent<HTMLElement>) => {
     if (e.button !== 0 || (e.target as HTMLElement).closest("button")) return;
