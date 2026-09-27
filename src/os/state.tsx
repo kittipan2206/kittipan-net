@@ -17,6 +17,7 @@ import { isMobileViewport } from "./actions";
 import { PHASE_PROGRESS, phaseAt, shadowOffset, sunProgress, type Phase } from "./sun";
 import { festivalOn, type Festival } from "./festival";
 import { registerPWA } from "./pwa";
+import { seedFs, type Fs } from "./files";
 
 export interface Win {
   id: AppId;
@@ -46,6 +47,7 @@ export type Accent = "orange" | "green" | "blue";
 export type Wallpaper = "sky" | "plain";
 export type Screensaver = "off" | "1m" | "5m";
 export type CursorPref = "custom" | "system";
+export type DocApp = "notes" | "folder" | "preview";
 
 export interface Prefs {
   lang: Lang;
@@ -67,6 +69,12 @@ export interface OSState extends Prefs {
   festival: Festival | null;
   /** set from Terminal `festival <name|off>` for this session; null = follow the calendar */
   festivalOverride: Festival | "off" | null;
+  /** apps visitors tried to throw away this session (they always come back) */
+  trashLog: { id: AppId; at: number }[];
+  /** this visitor's files (localStorage) */
+  fs: Fs;
+  /** which file each document app is showing */
+  docs: Partial<Record<DocApp, string>>;
   owner: {
     status: OwnerStatus;
     email?: string | null;
@@ -102,6 +110,9 @@ type Action =
   | { type: "prefs"; patch: Partial<Prefs> }
   | { type: "phase"; phase: Phase }
   | { type: "festival"; festival: Festival | null }
+  | { type: "trashed"; ids: AppId[] }
+  | { type: "fs"; apply: (fs: Fs) => Fs }
+  | { type: "doc"; app: DocApp; id: string }
   | { type: "festivalOverride"; value: Festival | "off" | null }
   | { type: "owner"; owner: OSState["owner"] }
   | { type: "spotlight"; open: boolean }
@@ -136,6 +147,9 @@ const initialState: OSState = {
   phase: "night",
   festival: null,
   festivalOverride: null,
+  trashLog: [],
+  fs: {},
+  docs: {},
   owner: { status: "unknown" },
   spotlight: false,
   rebooting: false,
@@ -239,6 +253,12 @@ function reducer(state: OSState, action: Action): OSState {
         : { ...state, phase: action.phase };
     case "festival":
       return state.festival === action.festival ? state : { ...state, festival: action.festival };
+    case "fs":
+      return { ...state, fs: action.apply(state.fs) };
+    case "doc":
+      return { ...state, docs: { ...state.docs, [action.app]: action.id } };
+    case "trashed":
+      return { ...state, trashLog: [...state.trashLog, ...action.ids.map((id) => ({ id, at: Date.now() }))] };
     case "festivalOverride":
       return { ...state, festivalOverride: action.value };
     case "owner":
@@ -263,6 +283,7 @@ const STORE = {
   accent: "kos_accent",
   wallpaper: "kos_wallpaper",
   windows: "kos_windows",
+  fs: "kos_fs",
   ownerHint: "kos_owner_hint",
 };
 
@@ -306,6 +327,7 @@ export function useOSStore() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const restored = useRef(false);
+  const fsLoaded = useRef(false);
 
   const notify = useCallback((text: string) => {
     dispatch({ type: "toast", text });
@@ -419,6 +441,17 @@ export function useOSStore() {
     }
   }, []);
 
+  const fsApply = useCallback((apply: (fs: Fs) => Fs) => dispatch({ type: "fs", apply }), []);
+
+  const openItem = useCallback(
+    (id: string, kind: "note" | "folder" | "image") => {
+      const app: DocApp = kind === "note" ? "notes" : kind === "folder" ? "folder" : "preview";
+      dispatch({ type: "doc", app, id });
+      open(app);
+    },
+    [open],
+  );
+
   const lock = useCallback(() => {
     write(STORE.ownerHint, null);
     location.href = "/cdn-cgi/access/logout";
@@ -455,6 +488,12 @@ export function useOSStore() {
     const hash = location.hash.slice(1);
     if (isAppId(hash))
       dispatch({ type: "open", id: hash, viewport: viewport() });
+    let fs: Fs | null = null;
+    try {
+      fs = JSON.parse(read(STORE.fs) ?? "null");
+    } catch {}
+    dispatch({ type: "fs", apply: () => fs ?? seedFs() });
+    fsLoaded.current = true;
     if (read(STORE.ownerHint)) probeOwner();
     registerPWA();
   }, [probeOwner]);
@@ -468,6 +507,10 @@ export function useOSStore() {
     }, 300);
     return () => clearTimeout(timer);
   }, [state.windows, state.zTop]);
+
+  useEffect(() => {
+    if (fsLoaded.current) write(STORE.fs, JSON.stringify(state.fs));
+  }, [state.fs]);
 
   useEffect(() => {
     write(STORE.prefs, JSON.stringify({ live: state.live, screensaver: state.screensaver, cursor: state.cursor }));
@@ -508,6 +551,8 @@ export function useOSStore() {
 
   return useMemo(
     () => ({
+      fsApply,
+      openItem,
       state,
       dispatch,
       notify,
@@ -524,6 +569,8 @@ export function useOSStore() {
     }),
     [
       state,
+      fsApply,
+      openItem,
       notify,
       open,
       close,

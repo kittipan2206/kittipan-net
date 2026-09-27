@@ -16,6 +16,7 @@ import { bangkokTime, sunTimes } from "../sun";
 import { BUILT_AT, COMMIT, VERSION } from "../version";
 import { Caps, Key } from "../ui";
 import { INSTALL_MESSAGE, installApp } from "../pwa";
+import { seedFs } from "../files";
 
 const ACCENT_SWATCH: Record<Accent, string> = {
   orange: "#ff5500",
@@ -86,7 +87,7 @@ function Row({
 }
 
 export function Settings() {
-  const { state, setPrefs, setSound, setLang, setTheme, setMotion, notify } = useOS();
+  const { state, setPrefs, setSound, setLang, setTheme, setMotion, notify, fsApply } = useOS();
   const now = useNow(60_000);
   const times = now ? sunTimes(now) : null;
 
@@ -207,6 +208,17 @@ export function Settings() {
           </div>
         ))}
       </section>
+      <Key
+        className="flex h-11 items-center justify-center gap-2 font-mono text-[13px]"
+        onClick={() => {
+          if (!window.confirm("Reset the desktop? Your notes, folders and icon layout go back to the originals.")) return;
+          fsApply(() => seedFs());
+          window.dispatchEvent(new CustomEvent("kos:icons", { detail: "cleanup" }));
+          notify("Desktop reset");
+        }}
+      >
+        Reset desktop &amp; files
+      </Key>
       <Key
         className="flex h-11 items-center justify-center gap-2 font-mono text-[13px]"
         onClick={async () => notify(INSTALL_MESSAGE[await installApp()])}

@@ -5,6 +5,29 @@ Add entries under **Unreleased** as you work, then run `npm run release -- <patc
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-09-27
+
+### Added
+- Files on the desktop: notes (`.txt`), folders and images, stored only in the visitor's browser.
+- Starter files you can delete right away: `readme.txt`, `todo.txt`, `kittipan-os-v2.jpg` and an `Old site` folder with a bit of lore.
+- Notes app (autosave, rename, word count), Folder window (new note/folder, move to desktop, delete), Preview for images.
+- Right-click desktop → New Note / New Folder (lands where you clicked, name ready to type). Right-click an icon → Open / Rename / Move to Trash. F2 renames.
+- Drag files onto a folder to move them in.
+- Real Trash: files go in and stay until you Put Back, Delete Now or Empty Trash (with confirmation). Folders take their contents with them. Apps still bounce back.
+- Terminal: `ls files`, `cat`, `rm` (to Trash), `touch`.
+- Settings → Reset desktop & files.
+
+
+## [3.1.0] - 2026-09-27
+
+### Added
+- Arrange the desktop: drag icons anywhere; they snap to a grid with a springy landing and a dashed drop target, tilt with drag speed, and the layout is remembered.
+- Marquee selection on empty desktop and ⌘/Shift-click to select several icons, then move them together.
+- Single click selects, double-click (or Enter) opens — like a real desktop. The dock still opens on one click.
+- Trash: drag icons onto it (it lights up and wiggles), they get swallowed with a crunch… and pop back out with a quip. Delete/Backspace works too. Double-click Trash to see every escape attempt.
+- Right-click desktop: "Clean up icons" and "Sort icons by name".
+
+
 ## [3.0.1] - 2026-09-27
 
 ### Fixed

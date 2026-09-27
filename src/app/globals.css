@@ -516,6 +516,102 @@ html[data-phase="day"] .kos-cursor-layer {
   }
 }
 
+/* ─── Desktop icons ─────────────────────────────────────── */
+.desk-icon {
+  z-index: 4;
+  left: 0;
+  top: 0;
+  touch-action: none;
+  transition: transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.desk-icon.is-dragging {
+  z-index: 200;
+  transition: none;
+}
+.desk-icon.is-dragging .desk-icon-key {
+  transition: transform 90ms linear;
+  box-shadow:
+    var(--shadow-hard),
+    calc(var(--sx) * 2) calc(var(--sy) + 12px) 22px rgba(0, 0, 0, 0.28);
+}
+.desk-icon.is-trashed {
+  z-index: 200;
+  transition: transform 320ms cubic-bezier(0.5, 0, 0.75, 0);
+}
+.desk-icon.is-trashed .desk-icon-key,
+.desk-icon.is-trashed > span:last-child {
+  opacity: 0;
+  transition:
+    transform 320ms cubic-bezier(0.5, 0, 0.75, 0),
+    opacity 320ms;
+}
+.desk-icon.is-respawn {
+  transition: transform 640ms cubic-bezier(0.34, 1.7, 0.5, 1);
+}
+.desk-icon.is-respawn .desk-icon-key {
+  animation: icon-respawn 640ms cubic-bezier(0.34, 1.8, 0.5, 1);
+}
+.desk-icon.is-over-trash {
+  opacity: 0.55;
+}
+.desk-icon.is-over-trash > span:last-child {
+  visibility: hidden;
+}
+.desk-icon.is-hot {
+  z-index: 250;
+}
+.desk-icon.is-eating .desk-icon-key {
+  animation: trash-gulp 520ms cubic-bezier(0.34, 1.8, 0.5, 1) 180ms;
+}
+@keyframes trash-gulp {
+  30% {
+    transform: scaleX(1.18) scaleY(0.82);
+  }
+  60% {
+    transform: scaleX(0.92) scaleY(1.1);
+  }
+}
+.desk-icon.is-hot .desk-icon-key {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: #161616;
+  animation: trash-wiggle 360ms ease-in-out infinite;
+}
+.desk-icon-key.is-selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.desk-icon:focus-visible .desk-icon-key {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.icon-target {
+  border: 2px dashed color-mix(in srgb, var(--accent) 70%, transparent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  pointer-events: none;
+}
+@keyframes icon-respawn {
+  0% {
+    transform: scale(0.2) translateY(18px);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.16) translateY(-8px);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(0.96) translateY(1px);
+  }
+}
+@keyframes trash-wiggle {
+  25% {
+    transform: rotate(-8deg) scale(1.15);
+  }
+  75% {
+    transform: rotate(8deg) scale(1.15);
+  }
+}
+
 /* Springy hover: keys lift a little and settle with overshoot. */
 @media (hover: hover) and (pointer: fine) {
   .key {

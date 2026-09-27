@@ -80,7 +80,7 @@ export function ContextMenu({
   };
 
   const left = Math.min(x, window.innerWidth - 236);
-  const top = Math.min(y, window.innerHeight - 420);
+  const top = Math.min(y, window.innerHeight - 540);
 
   return (
     <div
@@ -92,6 +92,9 @@ export function ContextMenu({
       style={{ left, top }}
       className="fixed z-[170] w-[224px] rounded-md border border-black bg-[#1c1c1a] p-1.5 font-mono text-xs text-[#edebe5] shadow-[0_4px_0_#000,0_20px_50px_rgba(0,0,0,0.5)]"
     >
+      <Item onSelect={run(() => window.dispatchEvent(new CustomEvent("kos:new", { detail: { kind: "note", x, y } })))}>New Note</Item>
+      <Item onSelect={run(() => window.dispatchEvent(new CustomEvent("kos:new", { detail: { kind: "folder", x, y } })))}>New Folder</Item>
+      <Sep />
       <Item onSelect={run(() => os.open("terminal"))}>Open Terminal</Item>
       <Item onSelect={run(() => os.open("projects"))}>Open Projects</Item>
       <Item onSelect={run(() => os.open("snake"))}>Play Snake</Item>
@@ -114,6 +117,8 @@ export function ContextMenu({
       >
         Live wallpaper
       </Item>
+      <Item onSelect={run(() => window.dispatchEvent(new CustomEvent("kos:icons", { detail: "cleanup" })))}>Clean up icons</Item>
+      <Item onSelect={run(() => window.dispatchEvent(new CustomEvent("kos:icons", { detail: "sort" })))}>Sort icons by name</Item>
       <Item
         onSelect={run(() => window.dispatchEvent(new Event("kos:screensaver")))}
       >
