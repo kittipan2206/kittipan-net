@@ -15,7 +15,8 @@ export type Effect =
   | { type: "sound"; on: boolean }
   | { type: "clear" }
   | { type: "reboot" }
-  | { type: "unlock" };
+  | { type: "unlock" }
+  | { type: "screensaver" };
 
 export interface TerminalContext {
   name: string;
@@ -28,6 +29,7 @@ export interface TerminalContext {
   time: string;
   weather: string | null;
   uptimeSeconds: number;
+  version: string;
 }
 
 export interface Result {
@@ -48,7 +50,9 @@ const HELP: Line[] = [
   { text: "  date · weather    Bangkok, right now" },
   { text: "  neofetch          system info" },
   { text: "  unlock            owner sign-in" },
-  { text: "  clear · reboot · exit" },
+  { text: "  version           build info · `changelog` for what's new" },
+  { text: "  clear · reboot · screensaver · exit" },
+  { text: "  tip: press Tab to complete", tone: "muted" },
   { text: "there are a few more. poke around.", tone: "muted" },
 ];
 
@@ -147,7 +151,7 @@ export function runCommand(input: string, ctx: TerminalContext): Result {
       return ok(
         { text: "guest@kittipan-os", tone: "accent" },
         { text: "-----------------" },
-        { text: "OS       kittipan OS 2.0" },
+        { text: `OS       kittipan OS ${ctx.version}` },
         { text: "Host     Cloudflare Pages (edge)" },
         { text: "Kernel   Next.js 15 · React 19" },
         { text: `Uptime   ${formatUptime(ctx.uptimeSeconds)}` },
@@ -167,6 +171,19 @@ export function runCommand(input: string, ctx: TerminalContext): Result {
     case "clear":
     case "cls":
       return fx([{ type: "clear" }]);
+
+    case "version":
+    case "ver":
+      return ok({ text: `kittipan OS ${ctx.version}` });
+
+    case "changelog":
+      return ok(
+        { text: "what's new → github.com/kittipan2206/kittipan-net/blob/main/CHANGELOG.md" },
+        { text: "or see Settings → System", tone: "muted" },
+      );
+
+    case "screensaver":
+      return fx([{ type: "screensaver" }]);
 
     case "reboot":
       return fx([{ type: "reboot" }], { text: "rebooting…", tone: "muted" });
@@ -208,6 +225,35 @@ export function runCommand(input: string, ctx: TerminalContext): Result {
     default:
       return err(`command not found: ${cmd}. type \`help\`.`);
   }
+}
+
+// Tab completion: first word completes commands, the second completes that command's arguments.
+export const COMMANDS = [
+  "help", "whoami", "ls", "open", "lang", "theme", "sound", "date", "weather", "neofetch",
+  "unlock", "version", "changelog", "clear", "reboot", "screensaver", "exit", "echo",
+];
+
+export function complete(input: string, apps: string[]): { value: string; options: string[] } {
+  const parts = input.replace(/^\s+/, "").split(/\s+/);
+  const args: Record<string, string[]> = {
+    open: apps,
+    ls: ["apps", "projects"],
+    lang: ["th", "en"],
+    theme: ["auto", "dawn", "day", "dusk", "night"],
+    sound: ["on", "off"],
+  };
+  const [pool, prefix, head] =
+    parts.length <= 1
+      ? [COMMANDS, parts[0] ?? "", ""]
+      : parts.length === 2
+        ? [args[parts[0].toLowerCase()] ?? [], parts[1], `${parts[0]} `]
+        : [[], "", ""];
+  const options = pool.filter((c) => c.startsWith(prefix.toLowerCase()));
+  if (options.length === 0) return { value: input, options: [] };
+  if (options.length === 1) return { value: `${head}${options[0]} `, options };
+  let common = options[0];
+  for (const o of options) while (!o.startsWith(common)) common = common.slice(0, -1);
+  return { value: `${head}${common.length > prefix.length ? common : prefix}`, options };
 }
 
 function formatUptime(s: number) {

@@ -2,21 +2,37 @@
 
 import type { ReactNode } from "react";
 import { sound } from "@/lib/sound";
-import { useOS, type MotionPref, type ThemePref } from "../state";
+import {
+  useOS,
+  type Accent,
+  type MotionPref,
+  type Screensaver,
+  type ThemePref,
+  type Wallpaper,
+} from "../state";
 import { useNow } from "../hooks";
 import { bangkokTime, sunTimes } from "../sun";
+import { BUILT_AT, COMMIT, VERSION } from "../version";
 import { Caps } from "../ui";
+
+const ACCENT_SWATCH: Record<Accent, string> = {
+  orange: "#ff5500",
+  green: "#3fcf6e",
+  blue: "#2f7bff",
+};
 
 function Segmented<T extends string>({
   label,
   value,
   options,
   onChange,
+  swatch,
 }: {
   label: string;
   value: T;
   options: T[];
   onChange: (v: T) => void;
+  swatch?: Record<string, string>;
 }) {
   return (
     <div role="group" aria-label={label} className="segmented">
@@ -29,8 +45,15 @@ function Segmented<T extends string>({
             sound.playToggleClick(true);
             onChange(o);
           }}
-          className="font-mono uppercase"
+          className="flex items-center gap-1.5 font-mono uppercase"
         >
+          {swatch && (
+            <span
+              className="size-2 rounded-full"
+              style={{ background: swatch[o] }}
+              aria-hidden
+            />
+          )}
           {o}
         </button>
       ))}
@@ -61,13 +84,14 @@ function Row({
 }
 
 export function Settings() {
-  const { state, setSound, setLang, setTheme, setMotion } = useOS();
+  const { state, setPrefs, setSound, setLang, setTheme, setMotion } = useOS();
   const now = useNow(60_000);
   const times = now ? sunTimes(now) : null;
 
   return (
     <div className="flex flex-col gap-5 p-5 sm:p-6">
-      <section className="panel rounded-xl px-5 py-1">
+      <Caps>General</Caps>
+      <section className="panel -mt-3 rounded-xl px-5 py-1">
         <Row
           title="Sound"
           hint="Keyboard clicks and chimes, generated live. Off by default."
@@ -90,14 +114,6 @@ export function Settings() {
             onChange={setLang}
           />
         </Row>
-        <Row title="Lighting" hint="Auto follows the real sun over Bangkok.">
-          <Segmented<ThemePref>
-            label="Lighting"
-            value={state.themePref}
-            options={["auto", "dawn", "day", "dusk", "night"]}
-            onChange={setTheme}
-          />
-        </Row>
         <Row title="Motion" hint="Reduce animations everywhere.">
           <Segmented<MotionPref>
             label="Motion"
@@ -108,9 +124,68 @@ export function Settings() {
         </Row>
       </section>
 
-      <section className="lcd grid grid-cols-2 gap-x-6 gap-y-3 p-5 font-mono text-xs sm:grid-cols-3">
+      <Caps>Appearance</Caps>
+      <section className="panel -mt-3 rounded-xl px-5 py-1">
+        <Row title="Lighting" hint="Auto follows the real sun over Bangkok.">
+          <Segmented<ThemePref>
+            label="Lighting"
+            value={state.themePref}
+            options={["auto", "dawn", "day", "dusk", "night"]}
+            onChange={setTheme}
+          />
+        </Row>
+        <Row
+          title="Accent"
+          hint="The one color of the system: keys, LEDs and LCD digits."
+        >
+          <Segmented<Accent>
+            label="Accent"
+            value={state.accent}
+            options={["orange", "green", "blue"]}
+            swatch={ACCENT_SWATCH}
+            onChange={(accent) => setPrefs({ accent })}
+          />
+        </Row>
+        <Row
+          title="Wallpaper"
+          hint="Sky follows the lighting; plain is a flat chassis."
+        >
+          <Segmented<Wallpaper>
+            label="Wallpaper"
+            value={state.wallpaper}
+            options={["sky", "plain"]}
+            onChange={(wallpaper) => setPrefs({ wallpaper })}
+          />
+        </Row>
+        <Row
+          title="Live wallpaper"
+          hint="Stars at night, clouds by day, rain when it rains in Bangkok."
+        >
+          <Segmented
+            label="Live wallpaper"
+            value={state.live ? "on" : "off"}
+            options={["off", "on"]}
+            onChange={(v) => setPrefs({ live: v === "on" })}
+          />
+        </Row>
+        <Row
+          title="Screensaver"
+          hint="Floating clock after the desktop sits idle."
+        >
+          <Segmented<Screensaver>
+            label="Screensaver"
+            value={state.screensaver}
+            options={["off", "1m", "5m"]}
+            onChange={(screensaver) => setPrefs({ screensaver })}
+          />
+        </Row>
+      </section>
+
+      <Caps>System</Caps>
+      <section className="lcd -mt-3 grid grid-cols-2 gap-x-6 gap-y-3 p-5 font-mono text-xs sm:grid-cols-3">
         {[
-          ["System", "kittipan OS 2.0"],
+          ["Version", VERSION],
+          ["Build", `${COMMIT}${BUILT_AT ? ` · ${BUILT_AT}` : ""}`],
           ["Lighting now", state.phase],
           [
             "Sunrise · sunset",
@@ -119,7 +194,6 @@ export function Settings() {
               : "--",
           ],
           ["Host", "Cloudflare edge"],
-          ["Kernel", "Next.js 15"],
           ["Running cost", "0 THB / month"],
         ].map(([k, v]) => (
           <div key={k} className="flex flex-col gap-1">
@@ -128,7 +202,14 @@ export function Settings() {
           </div>
         ))}
       </section>
-      <Caps className="text-center">preferences stay on this device</Caps>
+      <a
+        href="https://github.com/kittipan2206/kittipan-net/blob/main/CHANGELOG.md"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="self-center font-mono text-[11px] text-sub underline hover:text-ink"
+      >
+        What&apos;s new in {VERSION}
+      </a>
     </div>
   );
 }

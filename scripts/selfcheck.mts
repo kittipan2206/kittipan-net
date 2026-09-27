@@ -1,8 +1,8 @@
 // Run: node scripts/selfcheck.mts
 import assert from "node:assert/strict";
 import { phaseAt, sunTimes, sunProgress, bangkokTime } from "../src/os/sun.ts";
-import { runCommand, type TerminalContext } from "../src/os/terminal.ts";
-import { validateClaims } from "../functions/api/private/launchpad.ts";
+import { complete, runCommand, type TerminalContext } from "../src/os/terminal.ts";
+import { normalizeTeamDomain, validateClaims } from "../functions/api/private/launchpad.ts";
 
 // Sun over Bangkok, 27 Sep 2026: sunrise ≈ 06:08, sunset ≈ 18:10 local.
 const day = new Date("2026-09-27T07:30:00Z"); // 14:30 BKK
@@ -36,6 +36,7 @@ const ctx: TerminalContext = {
   time: "14:30",
   weather: null,
   uptimeSeconds: 75,
+  version: "2.1.0 (abc1234)",
 };
 assert.match(runCommand("whoami", ctx).lines[0].text, /Kittipan Sankoh/);
 assert.deepEqual(runCommand("open about", ctx).effects, [
@@ -62,6 +63,16 @@ assert.match(runCommand("ls", ctx).lines[0].text, /launchpad\/ \[locked\]/);
 assert.match(runCommand("nope", ctx).lines[0].text, /command not found/);
 assert.equal(runCommand("   ", ctx).lines.length, 0);
 assert.match(runCommand("neofetch", ctx).lines[5].text, /1m 15s/);
+
+assert.match(runCommand("version", ctx).lines[0].text, /2\.1\.0/);
+assert.deepEqual(complete("who", ["about"]), { value: "whoami ", options: ["whoami"] });
+assert.deepEqual(complete("open co", ["about", "contact"]).value, "open contact ");
+assert.deepEqual(complete("s", ["about"]).options, ["sound", "screensaver"]);
+assert.equal(complete("s", ["about"]).value, "s");
+assert.equal(complete("th", ["about"]).value, "theme ");
+assert.equal(complete("theme d", []).value, "theme d");
+assert.deepEqual(complete("theme d", []).options, ["dawn", "day", "dusk"]);
+assert.equal(complete("zzz", []).options.length, 0);
 
 // Access JWT claims
 const now = 1_800_000_000;
@@ -107,5 +118,8 @@ assert.equal(
   ),
   true,
 );
+
+for (const v of ["royal-violet-9bc8.cloudflareaccess.com", "https://royal-violet-9bc8.cloudflareaccess.com/", " https://royal-violet-9bc8.cloudflareaccess.com/cdn-cgi "])
+  assert.equal(normalizeTeamDomain(v), "https://royal-violet-9bc8.cloudflareaccess.com");
 
 console.log(`selfcheck ok · sunrise ${rise} · sunset ${set}`);

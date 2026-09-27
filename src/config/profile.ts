@@ -100,4 +100,86 @@ export const profile = {
   ] as SocialLink[],
 };
 
+export interface Project {
+  id: string;
+  code: string;
+  name: string;
+  year: string;
+  kind: Localized;
+  summary: Localized;
+  points: Localized[];
+  stack: string[];
+  media?: { video: string; poster: string };
+  links: { label: string; url: string }[];
+}
+
+// Public work only: private repos and client projects never go here (the repo is public).
+export const projects: Project[] = [
+  {
+    id: "kittipan-os",
+    code: "OS",
+    name: "kittipan OS",
+    year: "2026",
+    kind: { en: "Personal site · browser OS", th: "เว็บส่วนตัว · OS บนเบราว์เซอร์" },
+    summary: {
+      en: "The site you're using: a personal operating system for the web. Guests explore; the owner unlocks a private hub behind Cloudflare Access.",
+      th: "เว็บที่คุณกำลังใช้อยู่ ระบบปฏิบัติการส่วนตัวบนเว็บ คนทั่วไปเข้ามาเล่นได้ ส่วนเจ้าของปลดล็อกศูนย์กลางส่วนตัวผ่าน Cloudflare Access",
+    },
+    points: [
+      { en: "Lighting follows the real sun over Bangkok, computed in the browser", th: "แสงของทั้ง OS เปลี่ยนตามดวงอาทิตย์จริงเหนือกรุงเทพ คำนวณในเบราว์เซอร์" },
+      { en: "Owner mode verified twice: Cloudflare Access + JWT check in a Pages Function", th: "โหมดเจ้าของตรวจสองชั้น ทั้ง Cloudflare Access และตรวจ JWT ใน Pages Function" },
+      { en: "Static export on the edge — runs at 0 THB a month", th: "Static export บน edge ค่าใช้จ่าย 0 บาทต่อเดือน" },
+    ],
+    stack: ["Next.js", "TypeScript", "Tailwind", "Framer Motion", "Cloudflare Pages"],
+    media: { video: "/projects/kittipan-os.mp4", poster: "/projects/kittipan-os.jpg" },
+    links: [{ label: "Source", url: "https://github.com/kittipan2206/kittipan-net" }],
+  },
+  {
+    id: "khuandon",
+    code: "KD",
+    name: "Khuan Don Agriculture Portal",
+    year: "2026",
+    kind: { en: "Public service portal · local government", th: "พอร์ทัลบริการประชาชน · อบต." },
+    summary: {
+      en: "Online agriculture services for Khuan Don SAO, Satun: villagers file requests from their phone, track them by code, and follow farming news — no trip to the office.",
+      th: "บริการด้านการเกษตรออนไลน์ของ อบต.ควนโดน จ.สตูล ชาวบ้านแจ้งเรื่องผ่านมือถือ ติดตามสถานะด้วยรหัส และดูข่าวงานเกษตรได้ ไม่ต้องเดินทางไปสำนักงาน",
+    },
+    points: [
+      { en: "Request tracking by code, with email updates", th: "ติดตามเรื่องร้องเรียนด้วยรหัส พร้อมแจ้งเตือนทางอีเมล" },
+      { en: "Admin CMS: rich-text news and services, drag-to-sort, maps", th: "ระบบหลังบ้าน เขียนข่าวและบริการแบบ rich text ลากเรียงลำดับ และแผนที่" },
+      { en: "Mobile-first Thai design, built for people who only have a phone", th: "ออกแบบภาษาไทยโดยคิดจากมือถือก่อน สำหรับคนที่มีแค่มือถือ" },
+    ],
+    stack: ["Next.js", "Supabase", "Tiptap", "Leaflet", "Resend"],
+    media: { video: "/projects/khuandon.mp4", poster: "/projects/khuandon.jpg" },
+    links: [{ label: "Live site", url: "https://khuandon-web.vercel.app" }],
+  },
+];
+
+export const archive: { name: string; note: Localized; url: string; year: string }[] = [
+  {
+    name: "rpi-wifi-fix",
+    year: "2023",
+    note: { en: "Simultaneous AP + client Wi-Fi on a Raspberry Pi", th: "ให้ Raspberry Pi เป็นทั้ง access point และต่อ Wi-Fi พร้อมกัน" },
+    url: "https://github.com/kittipan2206/rpi-wifi-fix",
+  },
+  {
+    name: "smart-bus-app",
+    year: "2023",
+    note: { en: "Flutter app for a smart bus system", th: "แอป Flutter สำหรับระบบรถบัสอัจฉริยะ" },
+    url: "https://github.com/kittipan2206/smart-bus-app",
+  },
+  {
+    name: "music_playlist_app",
+    year: "2025",
+    note: { en: "Flutter music playlist app for Android and iOS", th: "แอปเพลย์ลิสต์เพลงด้วย Flutter ทั้ง Android และ iOS" },
+    url: "https://github.com/kittipan2206/music_playlist_app",
+  },
+  {
+    name: "Maker Tutor",
+    year: "2017",
+    note: { en: "Arduino tutorials on YouTube", th: "ช่อง YouTube สอน Arduino" },
+    url: "https://www.youtube.com/channel/UCaDCwZpf36YyALB5D_LvWlA",
+  },
+];
+
 export const pick = (value: Localized, lang: Lang) => value[lang];

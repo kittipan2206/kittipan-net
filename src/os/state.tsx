@@ -25,6 +25,8 @@ export interface Win {
   z: number;
   minimized: boolean;
   maximized: boolean;
+  /** set when restored from the dock, so the window can grow out of its dock key */
+  fromDock?: boolean;
 }
 
 export interface LaunchLink {
@@ -35,46 +37,81 @@ export interface LaunchLink {
 }
 
 export type OwnerStatus =
-  "unknown" | "checking" | "guest" | "owner" | "unconfigured";
+  "unknown" | "checking" | "guest" | "owner" | "unconfigured" | "error";
 export type ThemePref = Phase | "auto";
 export type MotionPref = "system" | "reduced";
+export type Accent = "orange" | "green" | "blue";
+export type Wallpaper = "sky" | "plain";
+export type Screensaver = "off" | "1m" | "5m";
 
-export interface OSState {
-  windows: Win[];
-  zTop: number;
-  mobileApp: AppId | null;
+export interface Prefs {
   lang: Lang;
   sound: boolean;
   themePref: ThemePref;
   motion: MotionPref;
+  accent: Accent;
+  wallpaper: Wallpaper;
+  live: boolean;
+  screensaver: Screensaver;
+}
+
+export interface OSState extends Prefs {
+  windows: Win[];
+  zTop: number;
+  mobileApp: AppId | null;
   phase: Phase;
-  owner: { status: OwnerStatus; email?: string | null; links?: LaunchLink[] };
+  owner: {
+    status: OwnerStatus;
+    email?: string | null;
+    links?: LaunchLink[];
+    message?: string;
+  };
   spotlight: boolean;
   rebooting: boolean;
   toast: { id: number; text: string } | null;
 }
 
+type Viewport = { w: number; h: number };
+
 type Action =
-  | { type: "open"; id: AppId; viewport?: { w: number; h: number } }
+  | { type: "open"; id: AppId; viewport?: Viewport }
   | { type: "close"; id: AppId }
   | { type: "focus"; id: AppId }
   | { type: "minimize"; id: AppId }
   | { type: "toggleMax"; id: AppId }
   | { type: "move"; id: AppId; x: number; y: number }
-  | { type: "closeMobile" }
-  | { type: "fitAll"; viewport: { w: number; h: number } }
-  | { type: "frame"; id: AppId; x: number; y: number; w: number; h: number }
   | {
-      type: "prefs";
-      patch: Partial<Pick<OSState, "lang" | "sound" | "themePref" | "motion">>;
+      type: "frame";
+      id: AppId;
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+      maximized?: boolean;
     }
+  | { type: "fitAll"; viewport: Viewport }
+  | { type: "restoreWindows"; windows: Win[]; zTop: number }
+  | { type: "closeMobile" }
+  | { type: "prefs"; patch: Partial<Prefs> }
   | { type: "phase"; phase: Phase }
   | { type: "owner"; owner: OSState["owner"] }
   | { type: "spotlight"; open: boolean }
   | { type: "reboot"; on: boolean }
   | { type: "toast"; text: string | null };
 
+export const DEFAULT_PREFS: Prefs = {
+  lang: "en",
+  sound: false,
+  themePref: "auto",
+  motion: "system",
+  accent: "orange",
+  wallpaper: "sky",
+  live: true,
+  screensaver: "1m",
+};
+
 const initialState: OSState = {
+  ...DEFAULT_PREFS,
   windows: [
     {
       ...appById("about").frame,
@@ -86,10 +123,6 @@ const initialState: OSState = {
   ],
   zTop: 1,
   mobileApp: null,
-  lang: "en",
-  sound: false,
-  themePref: "auto",
-  motion: "system",
   phase: "night",
   owner: { status: "unknown" },
   spotlight: false,
@@ -98,10 +131,10 @@ const initialState: OSState = {
 };
 
 // Keep windows inside the area between the icon column, widget column, menu bar and dock.
-function fitFrame(
-  frame: Win | (typeof APPS)[number]["frame"],
-  viewport?: { w: number; h: number },
-) {
+function fitFrame<T extends { x: number; y: number; w: number; h: number }>(
+  frame: T,
+  viewport?: Viewport,
+): T {
   if (!viewport) return frame;
   const right = viewport.w >= 1280 ? 340 : 24;
   const maxW = Math.max(360, viewport.w - 128 - right);
@@ -112,10 +145,19 @@ function fitFrame(
     ...frame,
     w,
     h,
-    x: Math.min(frame.x, viewport.w - right - w),
-    y: Math.min(frame.y, 36 + maxH - h + 12),
+    x: Math.max(8, Math.min(frame.x, viewport.w - right - w)),
+    y: Math.max(44, Math.min(frame.y, 36 + maxH - h + 12)),
   };
 }
+
+const mapWin = (
+  state: OSState,
+  id: AppId,
+  patch: (w: Win) => Partial<Win>,
+) => ({
+  ...state,
+  windows: state.windows.map((w) => (w.id === id ? { ...w, ...patch(w) } : w)),
+});
 
 function reducer(state: OSState, action: Action): OSState {
   switch (action.type) {
@@ -124,7 +166,9 @@ function reducer(state: OSState, action: Action): OSState {
       const existing = state.windows.find((w) => w.id === action.id);
       const windows = existing
         ? state.windows.map((w) =>
-            w.id === action.id ? { ...w, minimized: false, z } : w,
+            w.id === action.id
+              ? { ...w, fromDock: w.minimized, minimized: false, z }
+              : w,
           )
         : [
             ...state.windows,
@@ -145,44 +189,34 @@ function reducer(state: OSState, action: Action): OSState {
         mobileApp: state.mobileApp === action.id ? null : state.mobileApp,
       };
     case "focus": {
-      const top = state.windows.find((w) => w.id === action.id);
-      if (!top || top.z === state.zTop) return state;
+      const target = state.windows.find((w) => w.id === action.id);
+      if (!target || target.z === state.zTop) return state;
       const z = state.zTop + 1;
-      return {
-        ...state,
-        zTop: z,
-        windows: state.windows.map((w) =>
-          w.id === action.id ? { ...w, z } : w,
-        ),
-      };
+      return { ...mapWin(state, action.id, () => ({ z })), zTop: z };
     }
     case "minimize":
-      return {
-        ...state,
-        windows: state.windows.map((w) =>
-          w.id === action.id ? { ...w, minimized: true } : w,
-        ),
-      };
+      return mapWin(state, action.id, () => ({ minimized: true }));
     case "toggleMax":
-      return {
-        ...state,
-        windows: state.windows.map((w) =>
-          w.id === action.id ? { ...w, maximized: !w.maximized } : w,
-        ),
-      };
+      return mapWin(state, action.id, (w) => ({ maximized: !w.maximized }));
     case "move":
-      return {
-        ...state,
-        windows: state.windows.map((w) =>
-          w.id === action.id ? { ...w, x: action.x, y: action.y } : w,
-        ),
-      };
+      return mapWin(state, action.id, () => ({ x: action.x, y: action.y }));
     case "frame": {
-      const { id, x, y, w, h } = action;
-      return { ...state, windows: state.windows.map((win) => (win.id === id ? { ...win, x, y, w, h } : win)) };
+      const { id, x, y, w, h, maximized } = action;
+      return mapWin(state, id, (win) => ({
+        x,
+        y,
+        w,
+        h,
+        maximized: maximized ?? win.maximized,
+      }));
     }
     case "fitAll":
-      return { ...state, windows: state.windows.map((w) => ({ ...w, ...fitFrame(w, action.viewport) })) };
+      return {
+        ...state,
+        windows: state.windows.map((w) => fitFrame(w, action.viewport)),
+      };
+    case "restoreWindows":
+      return { ...state, windows: action.windows, zTop: action.zTop };
     case "closeMobile":
       return { ...state, mobileApp: null };
     case "prefs":
@@ -206,9 +240,13 @@ function reducer(state: OSState, action: Action): OSState {
 }
 
 const STORE = {
+  prefs: "kos_prefs",
   lang: "kos_lang",
   theme: "kos_theme",
   motion: "kos_motion",
+  accent: "kos_accent",
+  wallpaper: "kos_wallpaper",
+  windows: "kos_windows",
   ownerHint: "kos_owner_hint",
 };
 
@@ -226,9 +264,32 @@ const write = (key: string, value: string | null) => {
   } catch {}
 };
 
+function readSavedWindows(): { windows: Win[]; zTop: number } | null {
+  try {
+    const saved = JSON.parse(read(STORE.windows) ?? "null") as {
+      windows: Win[];
+      zTop: number;
+    } | null;
+    if (!saved || !Array.isArray(saved.windows)) return null;
+    const windows = saved.windows
+      .filter(
+        (w) =>
+          isAppId(w.id) && [w.x, w.y, w.w, w.h, w.z].every(Number.isFinite),
+      )
+      .map((w) => ({ ...w, fromDock: false }));
+    return {
+      windows,
+      zTop: Math.max(saved.zTop || 1, ...windows.map((w) => w.z)),
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function useOSStore() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const restored = useRef(false);
 
   const notify = useCallback((text: string) => {
     dispatch({ type: "toast", text });
@@ -239,12 +300,10 @@ export function useOSStore() {
     );
   }, []);
 
+  const viewport = () => ({ w: window.innerWidth, h: window.innerHeight });
+
   const open = useCallback((id: AppId) => {
-    dispatch({
-      type: "open",
-      id,
-      viewport: { w: window.innerWidth, h: window.innerHeight },
-    });
+    dispatch({ type: "open", id, viewport: viewport() });
     history.replaceState(null, "", `#${id}`);
   }, []);
 
@@ -266,25 +325,30 @@ export function useOSStore() {
     if (top) close(top.id);
   }, [state.windows, close]);
 
-  const setLang = useCallback((lang: Lang) => {
-    dispatch({ type: "prefs", patch: { lang } });
-    write(STORE.lang, lang);
+  const setPrefs = useCallback((patch: Partial<Prefs>) => {
+    if (patch.sound !== undefined) sound.set(patch.sound);
+    dispatch({ type: "prefs", patch });
+    // Mirrors for the pre-paint script in layout.tsx (it runs before React and can't parse kos_prefs cheaply).
+    if (patch.themePref) write(STORE.theme, patch.themePref);
+    if (patch.motion) write(STORE.motion, patch.motion);
+    if (patch.accent) write(STORE.accent, patch.accent);
+    if (patch.wallpaper) write(STORE.wallpaper, patch.wallpaper);
+    if (patch.lang) write(STORE.lang, patch.lang);
   }, []);
 
-  const setTheme = useCallback((themePref: ThemePref) => {
-    dispatch({ type: "prefs", patch: { themePref } });
-    write(STORE.theme, themePref);
-  }, []);
-
-  const setMotion = useCallback((motion: MotionPref) => {
-    dispatch({ type: "prefs", patch: { motion } });
-    write(STORE.motion, motion);
-  }, []);
-
-  const setSound = useCallback((on: boolean) => {
-    sound.set(on);
-    dispatch({ type: "prefs", patch: { sound: on } });
-  }, []);
+  const setLang = useCallback((lang: Lang) => setPrefs({ lang }), [setPrefs]);
+  const setTheme = useCallback(
+    (themePref: ThemePref) => setPrefs({ themePref }),
+    [setPrefs],
+  );
+  const setMotion = useCallback(
+    (motion: MotionPref) => setPrefs({ motion }),
+    [setPrefs],
+  );
+  const setSound = useCallback(
+    (on: boolean) => setPrefs({ sound: on }),
+    [setPrefs],
+  );
 
   const probeOwner = useCallback(async () => {
     dispatch({ type: "owner", owner: { status: "checking" } });
@@ -306,13 +370,36 @@ export function useOSStore() {
         write(STORE.ownerHint, "1");
         return;
       }
-      write(STORE.ownerHint, null);
+      // Access redirects unauthenticated requests (opaque, status 0) and the function answers 401: both mean "not signed in".
+      if (
+        res.type === "opaqueredirect" ||
+        res.status === 401 ||
+        res.status === 404
+      ) {
+        write(STORE.ownerHint, null);
+        dispatch({ type: "owner", owner: { status: "guest" } });
+        return;
+      }
+      if (res.status === 503) {
+        dispatch({ type: "owner", owner: { status: "unconfigured" } });
+        return;
+      }
+      const body = (await res.json().catch(() => null)) as {
+        error?: string;
+        detail?: string;
+      } | null;
+      const message = [body?.error ?? `HTTP ${res.status}`, body?.detail]
+        .filter(Boolean)
+        .join(" — ");
+      dispatch({ type: "owner", owner: { status: "error", message } });
+    } catch (err) {
       dispatch({
         type: "owner",
-        owner: { status: res.status === 503 ? "unconfigured" : "guest" },
+        owner: {
+          status: "error",
+          message: err instanceof Error ? err.message : "network error",
+        },
       });
-    } catch {
-      dispatch({ type: "owner", owner: { status: "guest" } });
     }
   }, []);
 
@@ -321,35 +408,59 @@ export function useOSStore() {
     location.href = "/cdn-cgi/access/logout";
   }, []);
 
-  // Restore preferences, deep link and owner session once on mount.
+  // Restore preferences, windows, deep link and owner session once on mount.
   useEffect(() => {
+    let saved: Partial<Prefs> = {};
+    try {
+      saved = JSON.parse(read(STORE.prefs) ?? "{}");
+    } catch {}
     const lang =
       read(STORE.lang) ??
       (navigator.language.toLowerCase().startsWith("th") ? "th" : "en");
-    const theme = read(STORE.theme) as ThemePref | null;
-    const motion = read(STORE.motion) as MotionPref | null;
     dispatch({
       type: "prefs",
       patch: {
+        ...DEFAULT_PREFS,
+        ...saved,
         lang: lang === "th" ? "th" : "en",
         sound: sound.isEnabled(),
-        themePref: theme ?? "auto",
-        motion: motion ?? "system",
+        themePref: (read(STORE.theme) as ThemePref | null) ?? "auto",
+        motion: (read(STORE.motion) as MotionPref | null) ?? "system",
+        accent: (read(STORE.accent) as Accent | null) ?? "orange",
+        wallpaper: (read(STORE.wallpaper) as Wallpaper | null) ?? "sky",
       },
     });
+
+    const windows = readSavedWindows();
+    if (windows) dispatch({ type: "restoreWindows", ...windows });
+    dispatch({ type: "fitAll", viewport: viewport() });
+    restored.current = true;
+
     const hash = location.hash.slice(1);
     if (isAppId(hash))
-      dispatch({
-        type: "open",
-        id: hash,
-        viewport: { w: window.innerWidth, h: window.innerHeight },
-      });
+      dispatch({ type: "open", id: hash, viewport: viewport() });
     if (read(STORE.ownerHint)) probeOwner();
   }, [probeOwner]);
 
+  // Remember window layout (desktop) across visits.
   useEffect(() => {
-    const fit = () => dispatch({ type: "fitAll", viewport: { w: window.innerWidth, h: window.innerHeight } });
-    fit();
+    if (!restored.current) return;
+    const timer = setTimeout(() => {
+      const windows = state.windows.map(({ fromDock: _fromDock, ...w }) => w);
+      write(STORE.windows, JSON.stringify({ windows, zTop: state.zTop }));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [state.windows, state.zTop]);
+
+  useEffect(() => {
+    write(
+      STORE.prefs,
+      JSON.stringify({ live: state.live, screensaver: state.screensaver }),
+    );
+  }, [state.live, state.screensaver]);
+
+  useEffect(() => {
+    const fit = () => dispatch({ type: "fitAll", viewport: viewport() });
     window.addEventListener("resize", fit);
     return () => window.removeEventListener("resize", fit);
   }, []);
@@ -368,18 +479,14 @@ export function useOSStore() {
   }, [state.themePref]);
 
   useEffect(() => {
-    document.documentElement.dataset.phase = state.phase;
-  }, [state.phase]);
-
-  useEffect(() => {
-    document.documentElement.lang = state.lang;
-  }, [state.lang]);
-
-  useEffect(() => {
-    if (state.motion === "reduced")
-      document.documentElement.dataset.motion = "reduced";
-    else delete document.documentElement.dataset.motion;
-  }, [state.motion]);
+    const root = document.documentElement;
+    root.dataset.phase = state.phase;
+    root.dataset.accent = state.accent;
+    root.dataset.wallpaper = state.wallpaper;
+    root.lang = state.lang;
+    if (state.motion === "reduced") root.dataset.motion = "reduced";
+    else delete root.dataset.motion;
+  }, [state.phase, state.accent, state.wallpaper, state.lang, state.motion]);
 
   return useMemo(
     () => ({
@@ -389,6 +496,7 @@ export function useOSStore() {
       open,
       close,
       closeTop,
+      setPrefs,
       setLang,
       setTheme,
       setMotion,
@@ -402,6 +510,7 @@ export function useOSStore() {
       open,
       close,
       closeTop,
+      setPrefs,
       setLang,
       setTheme,
       setMotion,
@@ -433,3 +542,5 @@ export function useOS() {
 }
 
 export const unlockUrl = "/unlock/";
+
+export const APP_IDS = APPS.map((a) => a.id);

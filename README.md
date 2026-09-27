@@ -16,6 +16,7 @@ npm install
 npm run dev      # http://localhost:3000
 npm run check    # solar math, terminal parser, JWT claim checks
 npm run build    # static export → out/
+npm run release -- minor   # bump version, date CHANGELOG, tag
 ```
 
 Content lives in `src/config/profile.ts` (public only — this repo is public).

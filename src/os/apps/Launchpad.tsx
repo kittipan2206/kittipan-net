@@ -7,7 +7,7 @@ import { Caps } from "../ui";
 
 export function Launchpad() {
   const { state, probeOwner } = useOS();
-  const { status, links, email } = state.owner;
+  const { status, links, email, message } = state.owner;
 
   useEffect(() => {
     if (status === "unknown") probeOwner();
@@ -60,7 +60,7 @@ export function Launchpad() {
       </span>
       <div className="flex flex-col gap-1.5">
         <span className="font-mono text-base font-semibold text-ink">
-          {checking ? "Checking session…" : "Owner-only app"}
+          {checking ? "Checking session…" : status === "error" ? "Signed in, but verification failed" : "Owner-only app"}
         </span>
         <p className="m-0 max-w-[380px] font-sans text-sm leading-relaxed text-sub">
           {status === "unconfigured"
@@ -68,7 +68,15 @@ export function Launchpad() {
             : "Private apps load only after Cloudflare Access verifies the owner. Nothing private ships inside this page."}
         </p>
       </div>
-      {!checking && status !== "unconfigured" && (
+      {status === "error" && message && (
+        <code className="max-w-[440px] break-words rounded-sm bg-lcd px-3 py-2 font-mono text-xs text-lcd-ink">{message}</code>
+      )}
+      {status === "error" && (
+        <button type="button" onClick={probeOwner} className="key flex h-10 items-center px-4 font-mono text-xs">
+          Try again
+        </button>
+      )}
+      {!checking && status !== "unconfigured" && status !== "error" && (
         <a
           href={unlockUrl}
           className="key key-accent flex h-12 items-center gap-2.5 px-5 font-mono text-sm font-semibold no-underline"
