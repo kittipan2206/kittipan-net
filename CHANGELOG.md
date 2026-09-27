@@ -5,6 +5,15 @@ Add entries under **Unreleased** as you work, then run `npm run release -- <patc
 
 ## [Unreleased]
 
+## [3.0.1] - 2026-09-27
+
+### Fixed
+- Cursor was invisible on light themes: the white blend-mode dot sat inside an isolated layer, so it never inverted.
+  The pointer is now a real OS cursor image (dark square, white outline): drawn by the system with zero lag and readable on any background.
+- Clickable elements get their own cursor (framed square); text fields and resize edges keep the system cursor.
+- Focus brackets only appear when locked onto something clickable, with a contrast halo per theme; disabled under forced colors.
+
+
 ## [3.0.0] - 2026-09-27 — "Tactile"
 
 ### Added

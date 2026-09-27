@@ -10,13 +10,12 @@ const RING = 26;
 const PAD = 5;
 
 /**
- * Industrial cursor: an exact square dot + focus-bracket reticle on a spring.
- * Over interactive elements the reticle wraps the element (magnetic, slight overshoot).
- * Mouse/trackpad only; touch and reduced motion keep the system cursor.
+ * Industrial cursor. The pointer is a CSS cursor image (see globals.css): hardware-drawn, no lag,
+ * readable on light and dark. This layer adds the delight: focus brackets that spring onto
+ * clickable elements and a dot-matrix burst on click. Mouse only; off for touch, reduced motion and forced colors.
  */
 export function Cursor() {
   const { state } = useOS();
-  const dot = useRef<HTMLDivElement>(null);
   const ring = useRef<HTMLDivElement>(null);
   const bursts = useRef<HTMLDivElement>(null);
   const enabled = state.cursor === "custom" && state.motion !== "reduced";
@@ -80,15 +79,12 @@ export function Cursor() {
         ring.current.style.width = `${s.w}px`;
         ring.current.style.height = `${s.h}px`;
       }
-      if (dot.current)
-        dot.current.style.transform = `translate(${pointer.x - 3}px, ${pointer.y - 3}px) scale(${pressed ? 0.6 : 1})`;
       raf = requestAnimationFrame(frame);
     };
 
     const setVisibility = () => {
       const show = visible && !hidden;
       ring.current?.classList.toggle("is-hidden", !show);
-      dot.current?.classList.toggle("is-hidden", !show);
     };
 
     const onMove = (e: PointerEvent) => {
@@ -159,7 +155,6 @@ export function Cursor() {
         <span />
         <span />
       </div>
-      <div ref={dot} className="cursor-dot is-hidden" />
     </div>
   );
 }
