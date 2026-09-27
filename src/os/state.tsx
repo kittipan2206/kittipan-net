@@ -63,6 +63,7 @@ type Action =
   | { type: "move"; id: AppId; x: number; y: number }
   | { type: "closeMobile" }
   | { type: "fitAll"; viewport: { w: number; h: number } }
+  | { type: "frame"; id: AppId; x: number; y: number; w: number; h: number }
   | {
       type: "prefs";
       patch: Partial<Pick<OSState, "lang" | "sound" | "themePref" | "motion">>;
@@ -176,6 +177,10 @@ function reducer(state: OSState, action: Action): OSState {
           w.id === action.id ? { ...w, x: action.x, y: action.y } : w,
         ),
       };
+    case "frame": {
+      const { id, x, y, w, h } = action;
+      return { ...state, windows: state.windows.map((win) => (win.id === id ? { ...win, x, y, w, h } : win)) };
+    }
     case "fitAll":
       return { ...state, windows: state.windows.map((w) => ({ ...w, ...fitFrame(w, action.viewport) })) };
     case "closeMobile":

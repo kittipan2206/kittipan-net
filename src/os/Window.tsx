@@ -9,6 +9,24 @@ import { useOS, type Win } from "./state";
 
 const MENU_H = 36;
 const DOCK_CLEARANCE = 96;
+const MIN_W = 360;
+const MIN_H = 240;
+
+type Edge = "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw";
+
+// Invisible grab zones on every edge and corner, like a real window manager.
+const HANDLES: { edge: Edge; className: string }[] = [
+  { edge: "n", className: "inset-x-2 -top-1 h-2 cursor-ns-resize" },
+  { edge: "s", className: "inset-x-2 -bottom-1 h-2 cursor-ns-resize" },
+  { edge: "e", className: "inset-y-2 -right-1 w-2 cursor-ew-resize" },
+  { edge: "w", className: "inset-y-2 -left-1 w-2 cursor-ew-resize" },
+  { edge: "nw", className: "-left-1 -top-1 size-3 cursor-nwse-resize" },
+  { edge: "se", className: "-bottom-1 -right-1 size-3 cursor-nwse-resize" },
+  { edge: "ne", className: "-right-1 -top-1 size-3 cursor-nesw-resize" },
+  { edge: "sw", className: "-bottom-1 -left-1 size-3 cursor-nesw-resize" },
+];
+
+type Gesture = { kind: "move" } | { kind: "resize"; edge: Edge };
 
 export function Window({
   win,
@@ -21,34 +39,59 @@ export function Window({
 }) {
   const { dispatch, close } = useOS();
   const app = appById(win.id);
-  const drag = useRef<{ px: number; py: number; x: number; y: number } | null>(
-    null,
-  );
+  const gesture = useRef<{
+    g: Gesture;
+    px: number;
+    py: number;
+    start: Win;
+  } | null>(null);
 
-  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+  const begin = (g: Gesture) => (e: PointerEvent<HTMLElement>) => {
     if (
       win.maximized ||
       e.button !== 0 ||
       (e.target as HTMLElement).closest("button")
     )
       return;
-    drag.current = { px: e.clientX, py: e.clientY, x: win.x, y: win.y };
+    e.stopPropagation();
+    gesture.current = { g, px: e.clientX, py: e.clientY, start: win };
     e.currentTarget.setPointerCapture(e.pointerId);
   };
-  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
-    const d = drag.current;
-    if (!d) return;
-    const x = Math.min(
-      Math.max(d.x + e.clientX - d.px, 80 - win.w),
-      window.innerWidth - 80,
-    );
-    const y = Math.min(
-      Math.max(d.y + e.clientY - d.py, MENU_H + 4),
-      window.innerHeight - 60,
-    );
-    dispatch({ type: "move", id: win.id, x, y });
+
+  const track = (e: PointerEvent<HTMLElement>) => {
+    const cur = gesture.current;
+    if (!cur) return;
+    const dx = e.clientX - cur.px;
+    const dy = e.clientY - cur.py;
+    const s = cur.start;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    if (cur.g.kind === "move") {
+      const x = Math.min(Math.max(s.x + dx, 80 - s.w), vw - 80);
+      const y = Math.min(Math.max(s.y + dy, MENU_H + 4), vh - 60);
+      dispatch({ type: "move", id: win.id, x, y });
+      return;
+    }
+
+    const { edge } = cur.g;
+    let { x, y, w, h } = s;
+    if (edge.includes("e"))
+      w = Math.min(Math.max(s.w + dx, MIN_W), vw - s.x - 8);
+    if (edge.includes("s"))
+      h = Math.min(Math.max(s.h + dy, MIN_H), vh - s.y - 8);
+    if (edge.includes("w")) {
+      w = Math.min(Math.max(s.w - dx, MIN_W), s.x + s.w - 8);
+      x = s.x + s.w - w;
+    }
+    if (edge.includes("n")) {
+      h = Math.min(Math.max(s.h - dy, MIN_H), s.y + s.h - MENU_H - 4);
+      y = s.y + s.h - h;
+    }
+    dispatch({ type: "frame", id: win.id, x, y, w, h });
   };
-  const endDrag = () => (drag.current = null);
+
+  const end = () => (gesture.current = null);
 
   const frame = win.maximized
     ? {
@@ -68,19 +111,16 @@ export function Window({
       transition={{ duration: 0.14, ease: [0.2, 0.7, 0.2, 1] }}
       onPointerDownCapture={() => dispatch({ type: "focus", id: win.id })}
       style={{ ...frame, zIndex: 10 + win.z }}
-      className={clsx(
-        "absolute flex flex-col overflow-hidden rounded-md border border-frame bg-panel shadow-window",
-        !focused && "saturate-[.85]",
-      )}
+      className="absolute flex flex-col rounded-md border border-frame bg-panel shadow-window"
     >
       <div
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
+        onPointerDown={begin({ kind: "move" })}
+        onPointerMove={track}
+        onPointerUp={end}
+        onPointerCancel={end}
         onDoubleClick={() => dispatch({ type: "toggleMax", id: win.id })}
         className={clsx(
-          "flex h-9 shrink-0 cursor-grab touch-none select-none items-center justify-between border-b border-line px-3 font-mono text-xs active:cursor-grabbing",
+          "flex h-9 shrink-0 cursor-grab touch-none select-none items-center justify-between rounded-t-md border-b border-line px-3 font-mono text-xs active:cursor-grabbing",
           win.id === "terminal" ? "bg-[#161614] text-[#edebe5]" : "text-ink",
         )}
       >
@@ -129,12 +169,25 @@ export function Window({
       </div>
       <div
         className={clsx(
-          "scroll-quiet min-h-0 grow",
+          "scroll-quiet min-h-0 grow rounded-b-md",
           win.id === "terminal" ? "overflow-hidden" : "overflow-y-auto",
+          !focused && "saturate-[.85]",
         )}
       >
         {children}
       </div>
+      {!win.maximized &&
+        HANDLES.map(({ edge, className }) => (
+          <div
+            key={edge}
+            aria-hidden
+            onPointerDown={begin({ kind: "resize", edge })}
+            onPointerMove={track}
+            onPointerUp={end}
+            onPointerCancel={end}
+            className={clsx("absolute z-10 touch-none", className)}
+          />
+        ))}
     </motion.section>
   );
 }
