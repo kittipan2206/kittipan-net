@@ -1,0 +1,216 @@
+// Pure command interpreter — no React, no imports, so scripts/selfcheck.ts can run it under plain Node.
+import type { Phase } from "./sun";
+
+export type Tone = "out" | "muted" | "accent" | "error";
+export interface Line {
+  text: string;
+  tone?: Tone;
+}
+
+export type Effect =
+  | { type: "open"; app: string }
+  | { type: "close" }
+  | { type: "lang"; lang: "th" | "en" }
+  | { type: "theme"; value: Phase | "auto" }
+  | { type: "sound"; on: boolean }
+  | { type: "clear" }
+  | { type: "reboot" }
+  | { type: "unlock" };
+
+export interface TerminalContext {
+  name: string;
+  role: string;
+  location: string;
+  email: string;
+  apps: { id: string; locked: boolean }[];
+  owner: boolean;
+  phase: Phase;
+  time: string;
+  weather: string | null;
+  uptimeSeconds: number;
+}
+
+export interface Result {
+  lines: Line[];
+  effects: Effect[];
+}
+
+const PHASES = ["auto", "dawn", "day", "dusk", "night"];
+
+const HELP: Line[] = [
+  { text: "commands", tone: "muted" },
+  { text: "  whoami            who runs this machine" },
+  { text: "  ls [apps]         list apps" },
+  { text: "  open <app>        open an app (about, contact, …)" },
+  { text: "  lang <th|en>      switch content language" },
+  { text: "  theme <phase>     auto | dawn | day | dusk | night" },
+  { text: "  sound <on|off>    keyboard clicks" },
+  { text: "  date · weather    Bangkok, right now" },
+  { text: "  neofetch          system info" },
+  { text: "  unlock            owner sign-in" },
+  { text: "  clear · reboot · exit" },
+  { text: "there are a few more. poke around.", tone: "muted" },
+];
+
+const ok = (...lines: Line[]): Result => ({ lines, effects: [] });
+const fx = (effects: Effect[], ...lines: Line[]): Result => ({
+  lines,
+  effects,
+});
+const err = (text: string): Result => ok({ text, tone: "error" });
+
+export function runCommand(input: string, ctx: TerminalContext): Result {
+  const raw = input.trim();
+  if (!raw) return ok();
+  const [cmdRaw, ...args] = raw.split(/\s+/);
+  const cmd = cmdRaw.toLowerCase();
+  const arg = (args[0] ?? "").toLowerCase();
+
+  switch (cmd) {
+    case "help":
+    case "?":
+      return ok(...HELP);
+
+    case "whoami":
+      return ok({ text: `${ctx.name} · ${ctx.role} · ${ctx.location}` });
+
+    case "ls": {
+      if (arg && arg !== "apps")
+        return ok({
+          text: `${arg}: coming soon. for now: github.com/kittipan2206`,
+          tone: "muted",
+        });
+      const list = ctx.apps
+        .map((a) => (a.locked ? `${a.id}/ [locked]` : `${a.id}/`))
+        .join("   ");
+      return ok({ text: list });
+    }
+
+    case "open": {
+      if (!arg) return err("usage: open <app>");
+      const app = ctx.apps.find((a) => a.id === arg);
+      if (!app) return err(`open: no such app: ${arg}`);
+      if (app.locked) {
+        return ok(
+          { text: `permission denied: ${arg} is owner-only.`, tone: "error" },
+          { text: "run `unlock` to sign in.", tone: "muted" },
+        );
+      }
+      return fx([{ type: "open", app: arg }], {
+        text: `opening ${arg}…`,
+        tone: "muted",
+      });
+    }
+
+    case "cd":
+      return ok({
+        text: "no directories here — everything is an app. try `open <app>`.",
+        tone: "muted",
+      });
+
+    case "lang":
+      if (arg !== "th" && arg !== "en") return err("usage: lang <th|en>");
+      return fx([{ type: "lang", lang: arg }], {
+        text:
+          arg === "th"
+            ? "เปลี่ยนภาษาเนื้อหาเป็นไทยแล้ว (system text stays English)"
+            : "content language set to English",
+      });
+
+    case "theme":
+      if (!PHASES.includes(arg))
+        return err("usage: theme <auto|dawn|day|dusk|night>");
+      return fx([{ type: "theme", value: arg as Phase | "auto" }], {
+        text:
+          arg === "auto"
+            ? "lighting follows the sun over Bangkok again"
+            : `lighting locked to ${arg}`,
+      });
+
+    case "sound":
+      if (arg !== "on" && arg !== "off") return err("usage: sound <on|off>");
+      return fx([{ type: "sound", on: arg === "on" }], {
+        text: `sound ${arg}`,
+      });
+
+    case "date":
+    case "time":
+      return ok({ text: `${ctx.time} · Bangkok (UTC+7) · ${ctx.phase}` });
+
+    case "weather":
+      return ok({
+        text: ctx.weather ?? "weather: still fetching, try again in a moment",
+        tone: ctx.weather ? "out" : "muted",
+      });
+
+    case "neofetch":
+      return ok(
+        { text: "guest@kittipan-os", tone: "accent" },
+        { text: "-----------------" },
+        { text: "OS       kittipan OS 2.0" },
+        { text: "Host     Cloudflare Pages (edge)" },
+        { text: "Kernel   Next.js 15 · React 19" },
+        { text: `Uptime   ${formatUptime(ctx.uptimeSeconds)}` },
+        { text: `Theme    industrial · ${ctx.phase}` },
+        { text: "Font     IBM Plex Mono · Doto" },
+        { text: "Cost     0 THB / month" },
+      );
+
+    case "unlock":
+      if (ctx.owner)
+        return ok({ text: "already unlocked. welcome back.", tone: "accent" });
+      return fx([{ type: "unlock" }], {
+        text: "redirecting to Cloudflare Access…",
+        tone: "muted",
+      });
+
+    case "clear":
+    case "cls":
+      return fx([{ type: "clear" }]);
+
+    case "reboot":
+      return fx([{ type: "reboot" }], { text: "rebooting…", tone: "muted" });
+
+    case "exit":
+    case "logout":
+      return fx([{ type: "close" }]);
+
+    case "echo":
+      return ok({ text: raw.slice(cmdRaw.length).trim() });
+
+    case "sudo":
+      return ok({
+        text: "nice try. this incident will be reported to /dev/null.",
+        tone: "error",
+      });
+
+    case "rm":
+      return ok({
+        text: "rm: kittipan OS is read-only for guests.",
+        tone: "error",
+      });
+
+    case "hello":
+    case "hi":
+    case "สวัสดี":
+      return ok({
+        text: "สวัสดีครับ — type `help` to look around.",
+        tone: "accent",
+      });
+
+    case "coffee":
+      return ok({ text: "error 418: I'm a teapot.", tone: "error" });
+
+    case "contact":
+    case "email":
+      return fx([{ type: "open", app: "contact" }], { text: ctx.email });
+
+    default:
+      return err(`command not found: ${cmd}. type \`help\`.`);
+  }
+}
+
+function formatUptime(s: number) {
+  const m = Math.floor(s / 60);
+  return m < 1 ? `${s}s` : `${m}m ${s % 60}s`;
+}

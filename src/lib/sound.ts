@@ -3,13 +3,13 @@
 
 class SoundEngine {
   private ctx: AudioContext | null = null;
-  private soundEnabled: boolean = true;
+  private soundEnabled: boolean = false;
   private isMuted: boolean = false;
 
   constructor() {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("kp_sound_enabled");
-      this.soundEnabled = saved !== null ? saved === "true" : true;
+      this.soundEnabled = saved === "true"; // off unless the visitor opted in
     }
   }
 
@@ -29,6 +29,14 @@ class SoundEngine {
 
   public isEnabled(): boolean {
     return this.soundEnabled && !this.isMuted;
+  }
+
+  public set(on: boolean) {
+    this.soundEnabled = on;
+    try {
+      localStorage.setItem("kp_sound_enabled", String(on));
+    } catch {}
+    if (on) this.playToggleClick(true);
   }
 
   public toggle(): boolean {

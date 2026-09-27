@@ -1,131 +1,103 @@
-export interface PortLink {
+// Public content only — this repo is public. Private data comes from /api/private/* at runtime.
+export type Lang = "th" | "en";
+export type Localized = Record<Lang, string>;
+
+export interface SocialLink {
   id: string;
   label: string;
+  code: string;
+  handle: string;
   url: string;
-  handle: string;
-  description: string;
-  icon: 'github' | 'linkedin' | 'facebook' | 'mail';
-  hotkey: string;
 }
 
-export interface TechItem {
-  name: string;
-  category: string;
-  detail: string;
-}
-
-export interface EngineeringDomain {
-  title: string;
-  badge: string;
-  description: string;
-  highlights: string[];
-}
-
-export interface ProfileConfig {
-  name: string;
-  handle: string;
-  role: string;
-  statement: string;
-  location: string;
-  timezone: string;
-  websiteUrl: string;
-  email: string;
-  domains: EngineeringDomain[];
-  portLinks: PortLink[];
-  techStack: TechItem[];
-  interests: string[];
-  vCard: {
-    firstName: string;
-    lastName: string;
-    organization: string;
-    title: string;
-    email: string;
-    url: string;
-    note: string;
-  };
-}
-
-export const profileConfig: ProfileConfig = {
+export const profile = {
   name: "Kittipan Sankoh",
-  handle: "@kittipan",
-  role: "Software & Mobile Engineer",
-  statement: "Specializing in cross-platform mobile engineering (Flutter / iOS / Android) and scalable modern web architecture. Dedicated to building reliable, high-performance digital products.",
-  location: "Bangkok, Thailand",
+  monogram: "KS",
+  role: {
+    en: "Software & Mobile Engineer",
+    th: "วิศวกรซอฟต์แวร์และแอปมือถือ",
+  } as Localized,
+  location: { en: "Bangkok, TH", th: "กรุงเทพฯ" } as Localized,
   timezone: "UTC+7",
   websiteUrl: "https://kittipan.net",
   email: "me@kittipan.net",
+  github: "https://github.com/kittipan2206",
+  statement: {
+    en: "I build cross-platform mobile apps (Flutter / iOS / Android) and modern web systems — and wire up everything else around me, from my smart home to the AI agents that help me work.",
+    th: "ผมสร้างแอปมือถือข้ามแพลตฟอร์ม (Flutter / iOS / Android) และระบบเว็บสมัยใหม่ แล้วก็ชอบต่อทุกอย่างรอบตัวให้เป็นระบบ ตั้งแต่บ้านอัจฉริยะไปจนถึง AI agent ที่ช่วยผมทำงาน",
+  } as Localized,
   domains: [
     {
-      title: "Mobile Application Engineering",
       badge: "Flutter · iOS · Android",
-      description: "Developing cross-platform mobile applications with native device integrations, reactive state management, and fluid motion design.",
-      highlights: ["Clean Architecture", "Offline-First Sync", "App Store & Play Store Delivery"],
+      title: {
+        en: "Mobile Application Engineering",
+        th: "พัฒนาแอปพลิเคชันมือถือ",
+      } as Localized,
+      description: {
+        en: "Cross-platform apps with native integrations, reactive state and fluid motion.",
+        th: "แอปข้ามแพลตฟอร์มที่เชื่อมฟีเจอร์ของเครื่องจริง จัดการ state แบบ reactive และเคลื่อนไหวลื่นไหล",
+      } as Localized,
+      highlights: "Clean Architecture · Offline-first · Store delivery",
     },
     {
-      title: "Scalable Web & System Architecture",
       badge: "React · Next.js · TypeScript",
-      description: "Crafting modern web applications, high-concurrency public portals, and secure API integrations with edge-first deployment.",
-      highlights: ["SSR / Static Edge Delivery", "Type-Safe APIs", "Responsive UX"],
+      title: {
+        en: "Web & System Architecture",
+        th: "สถาปัตยกรรมเว็บและระบบ",
+      } as Localized,
+      description: {
+        en: "Modern web apps, public portals and secure APIs with edge-first delivery.",
+        th: "เว็บแอปสมัยใหม่ พอร์ทัลสาธารณะ และ API ที่ปลอดภัย ส่งผ่าน edge ให้เร็วที่สุด",
+      } as Localized,
+      highlights: "Static edge · Type-safe APIs · Responsive UX",
     },
   ],
-  portLinks: [
+  stack: [
+    "Flutter & Dart",
+    "React & Next.js",
+    "TypeScript",
+    "Node.js",
+    "Supabase",
+    "Cloudflare",
+    "Home Assistant",
+  ],
+  now: {
+    text: {
+      en: "Building kittipan OS — a personal operating system for the web.",
+      th: "กำลังสร้าง kittipan OS ระบบปฏิบัติการส่วนตัวบนเว็บ",
+    } as Localized,
+    updated: "2026-09-27",
+  },
+  links: [
     {
       id: "linkedin",
       label: "LinkedIn",
-      url: "https://www.linkedin.com/in/kittipan-sankoh/",
+      code: "in",
       handle: "in/kittipan-sankoh",
-      description: "Professional profile, background & network",
-      icon: "linkedin",
-      hotkey: "L",
+      url: "https://www.linkedin.com/in/kittipan-sankoh/",
     },
     {
       id: "github",
       label: "GitHub",
-      url: "https://github.com/kittipan2206",
+      code: "GH",
       handle: "kittipan2206",
-      description: "Open source contributions, tools & code repositories",
-      icon: "github",
-      hotkey: "G",
-    },
-    {
-      id: "email",
-      label: "Direct Email",
-      url: "mailto:me@kittipan.net",
-      handle: "me@kittipan.net",
-      description: "Inquiries, collaboration & direct correspondence",
-      icon: "mail",
-      hotkey: "C",
+      url: "https://github.com/kittipan2206",
     },
     {
       id: "facebook",
       label: "Facebook",
-      url: "https://facebook.com",
-      handle: "Kittipan Sankoh",
-      description: "Personal social profile",
-      icon: "facebook",
-      hotkey: "F",
+      code: "FB",
+      handle: "yourkittipan",
+      url: "https://facebook.com/yourkittipan",
     },
-  ],
-  techStack: [
-    { name: "Flutter & Dart", category: "Mobile", detail: "iOS & Android Apps" },
-    { name: "React & Next.js", category: "Web", detail: "Edge Web Architecture" },
-    { name: "TypeScript", category: "Language", detail: "Type-Safe Codebases" },
-    { name: "Node.js", category: "Backend", detail: "REST APIs & Services" },
-    { name: "Tailwind CSS", category: "UI/UX", detail: "Design Systems & Tokens" },
-    { name: "Git & Cloudflare", category: "DevOps", detail: "CI/CD & Edge Delivery" },
-  ],
-  interests: [
-    "IoT & Smart Home Tinkerer",
-    "Hardware Automation",
-    "AI-Assisted Workflow Tools",
-  ],
-  vCard: {
-    firstName: "Kittipan",
-    lastName: "Sankoh",
-    organization: "Software Engineering",
-    title: "Software & Mobile Engineer",
-    email: "me@kittipan.net",
-    url: "https://kittipan.net",
-    note: "Kittipan Sankoh — Software & Mobile Engineer. Mobile (Flutter, iOS, Android) & Modern Web. Contact: me@kittipan.net",
-  },
+    {
+      id: "email",
+      label: "Email",
+      code: "@",
+      handle: "me@kittipan.net",
+      url: "mailto:me@kittipan.net",
+    },
+  ] as SocialLink[],
 };
+
+export const pick = (value: Localized, lang: Lang) => value[lang];

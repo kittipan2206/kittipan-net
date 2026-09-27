@@ -2,75 +2,262 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── kittipan OS design tokens ───────────────────────────────────────────
+   One accent (safety orange). Surfaces flip light/dark with the sun over Bangkok:
+   html[data-phase] is set pre-paint by the inline script in layout.tsx, then kept live by OS.tsx. */
 :root {
-  --bg-deep: #08090c;
-  --bg-surface: #0f1115;
-  --bg-surface-elevated: #15181f;
-  --border-subtle: rgba(255, 255, 255, 0.07);
-  --border-hover: rgba(255, 255, 255, 0.15);
-  --accent-orange: #ff5500;
-  --accent-green: #10b981;
+  --accent: #ff5500;
+  --accent-ink: #161616;
+  --led: #5fd384;
+  --lcd: #1b1c18;
+  --lcd-rim: #24251f;
+  --lcd-edge: #050505;
+  --lcd-ink: #ff6a1f;
+  --lcd-text: #d9d5cb;
+  --lcd-sub: #8c897f;
+  --lcd-line: #4a4a42;
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* dark surfaces are the default (night) */
+  --panel: #1c1c1a;
+  --card: #222220;
+  --frame: #050505;
+  --ink: #edebe5;
+  --sub: #a9a69e;
+  --line: #34332f;
+  --key: #282826;
+  --chip: #2f2f2b;
+  --bar: rgba(22, 22, 20, 0.86);
+  --label: #edebe5;
+  --win-shadow: 0 4px 0 #050505, 0 30px 90px rgba(255, 85, 0, 0.1);
+  --sky: linear-gradient(180deg, #06070a 0%, #0e1116 60%, #17191d 100%);
+  --dot: rgba(255, 255, 255, 0.05);
+  color-scheme: dark;
+}
+
+html[data-phase="dawn"],
+html[data-phase="day"] {
+  --panel: #f4f3ef;
+  --card: #faf9f6;
+  --frame: #1a1a18;
+  --ink: #161616;
+  --sub: #57554f;
+  --line: #d3d0c8;
+  --key: #fbfaf7;
+  --chip: #e6e3dc;
+  --bar: rgba(244, 243, 239, 0.86);
+  --label: #161616;
+  --win-shadow: 0 4px 0 #1a1a18, 0 30px 60px rgba(0, 0, 0, 0.12);
+  color-scheme: light;
+}
+
+html[data-phase="dawn"] {
+  --sky: linear-gradient(180deg, #e8b597 0%, #ead5c2 50%, #e3ddd3 100%);
+  --dot: rgba(22, 22, 22, 0.08);
+}
+html[data-phase="day"] {
+  --sky: linear-gradient(180deg, #c6dae3 0%, #dde2df 50%, #e4e1d9 100%);
+  --dot: rgba(22, 22, 22, 0.07);
+}
+html[data-phase="dusk"] {
+  --sky: linear-gradient(180deg, #27263a 0%, #6e4444 55%, #c4724a 100%);
+  --dot: rgba(255, 255, 255, 0.06);
+  --label: #f4f2ec;
+  --win-shadow: 0 4px 0 #050505, 0 30px 90px rgba(0, 0, 0, 0.35);
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
-  color: #ededed;
-  background-color: var(--bg-deep);
-  min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  overflow-x: hidden;
-  position: relative;
+  margin: 0;
+  background: #111210;
+  color: var(--ink);
+  font-family: var(--font-mono), ui-monospace, monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
 }
 
-/* Elegant ambient mesh background */
-.ambient-mesh {
-  background-color: #08090c;
-  background-image: 
-    radial-gradient(at 15% 15%, rgba(255, 85, 0, 0.04) 0px, transparent 50%),
-    radial-gradient(at 85% 25%, rgba(16, 185, 129, 0.03) 0px, transparent 50%),
-    radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 32px 32px;
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
-/* Modern luxury card styling */
-.clean-card {
-  background: rgba(17, 19, 24, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
-.clean-card:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(21, 24, 31, 0.85);
+@layer components {
+  .wallpaper {
+    background: var(--sky);
+  }
+  .dots {
+    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+    background-size: 16px 16px;
+  }
+
+  /* Keycap: hard offset shadow, physically presses down. */
+  .key {
+    background: var(--key);
+    color: var(--ink);
+    border: 1px solid var(--frame);
+    border-radius: var(--r-md);
+    box-shadow: 0 3px 0 var(--frame);
+    transition:
+      transform 80ms var(--ease),
+      box-shadow 80ms var(--ease),
+      background-color 200ms var(--ease);
+  }
+  .key:hover {
+    background: var(--card);
+  }
+  .key:active,
+  .key[aria-pressed="true"] {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--frame);
+  }
+  .key-accent {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: #161616;
+    box-shadow: 0 3px 0 #161616;
+  }
+  .key-accent:hover {
+    background: #ff6a1f;
+  }
+  .key-accent:active {
+    box-shadow: 0 1px 0 #161616;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--frame);
+    border-radius: var(--r-lg);
+    box-shadow: 0 3px 0 var(--frame);
+  }
+
+  .lcd {
+    background: var(--lcd);
+    color: var(--lcd-text);
+    border: 1px solid var(--lcd-edge);
+    border-radius: var(--r-lg);
+    box-shadow:
+      0 3px 0 var(--lcd-edge),
+      inset 0 0 0 4px var(--lcd-rim);
+  }
+  .lcd-digits {
+    font-family: var(--font-dot), var(--font-mono), monospace;
+    font-weight: 800;
+    color: var(--lcd-ink);
+    letter-spacing: 0.02em;
+    line-height: 1;
+    text-shadow: 0 0 18px rgba(255, 106, 31, 0.28);
+  }
+
+  .caps {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .segmented {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+  }
+  .segmented > button {
+    padding: 0 10px;
+    height: 28px;
+    color: var(--sub);
+    font-size: 11px;
+  }
+  .segmented > button[aria-pressed="true"] {
+    background: var(--ink);
+    color: var(--panel);
+  }
+
+  .scroll-quiet {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
 }
 
-/* Subtle interactive button */
-.interactive-pill {
-  transition: all 0.15s ease-out;
+/* Power-on reveal: ~0.8s of LCD rows switching on. Pure CSS so it also clears without JS. */
+.boot-reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  grid-template-rows: repeat(12, 1fr);
+  pointer-events: none;
+  animation: boot-hide 0s linear 0.95s forwards;
+}
+.boot-reveal > span {
+  background: #0b0c0a;
+  transform-origin: center;
+  animation: boot-band 0.42s var(--ease) forwards;
+  animation-delay: calc(var(--i) * 32ms);
+}
+.boot-reveal::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 14px var(--accent);
+  animation: boot-scan 0.5s var(--ease) forwards;
+}
+@keyframes boot-band {
+  to {
+    opacity: 0;
+    transform: scaleY(0.15);
+  }
+}
+@keyframes boot-scan {
+  to {
+    top: 100%;
+    opacity: 0;
+  }
+}
+@keyframes boot-hide {
+  to {
+    visibility: hidden;
+  }
 }
 
-.interactive-pill:active {
-  transform: scale(0.97);
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+.caret {
+  animation: caret 1s steps(1) infinite;
 }
 
-/* Custom minimal scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
+@media (prefers-reduced-motion: reduce) {
+  .boot-reveal {
+    display: none;
+  }
+  .caret {
+    animation: none;
+  }
 }
-
-::-webkit-scrollbar-track {
-  background: #08090c;
+html[data-motion="reduced"] .boot-reveal {
+  display: none;
 }
-
-::-webkit-scrollbar-thumb {
-  background: #20242e;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #2e3442;
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::after {
+  transition-duration: 0ms !important;
+  animation-duration: 0ms !important;
 }
