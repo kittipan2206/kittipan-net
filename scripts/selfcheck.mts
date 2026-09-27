@@ -1,6 +1,8 @@
 // Run: node scripts/selfcheck.mts
 import assert from "node:assert/strict";
-import { phaseAt, sunTimes, sunProgress, bangkokTime } from "../src/os/sun.ts";
+import { phaseAt, sunTimes, sunProgress, bangkokTime, shadowOffset } from "../src/os/sun.ts";
+import { festivalOn } from "../src/os/festival.ts";
+import { newGame, step, turn } from "../src/os/snake.ts";
 import { complete, runCommand, type TerminalContext } from "../src/os/terminal.ts";
 import { normalizeTeamDomain, validateClaims } from "../functions/api/private/launchpad.ts";
 
@@ -20,6 +22,35 @@ assert.equal(phaseAt(new Date("2026-09-27T17:30:00Z")), "night"); // 00:30 BKK
 assert.equal(sunProgress(new Date("2026-09-27T16:47:00Z")), null);
 const noonish = sunProgress(new Date("2026-09-27T05:10:00Z"))!;
 assert.ok(noonish > 0.4 && noonish < 0.6, `noon progress ${noonish}`);
+
+assert.deepEqual(shadowOffset(0), { x: 5, y: 4 });
+assert.deepEqual(shadowOffset(0.5), { x: 0, y: 3 });
+assert.deepEqual(shadowOffset(1), { x: -5, y: 4 });
+assert.deepEqual(shadowOffset(null), { x: 0, y: 3 });
+
+// Festivals (Bangkok dates)
+assert.equal(festivalOn(new Date("2027-04-13T02:00:00Z")), "songkran");
+assert.equal(festivalOn(new Date("2027-04-16T02:00:00Z")), null);
+assert.equal(festivalOn(new Date("2026-12-31T20:00:00Z")), "newyear"); // Jan 1 03:00 BKK
+assert.equal(festivalOn(new Date("2026-11-25T12:00:00Z")), "loykrathong");
+assert.equal(festivalOn(new Date("2026-11-24T12:00:00Z")), "loykrathong"); // eve
+assert.equal(festivalOn(new Date("2026-11-26T12:00:00Z")), null);
+assert.equal(festivalOn(new Date("2026-09-27T05:00:00Z")), null);
+
+// Snake
+const fixed = () => 0;
+let g = newGame(10, 8, fixed);
+assert.deepEqual(g.snake[0], [4, 4]);
+g = step(g, fixed);
+assert.deepEqual(g.snake[0], [5, 4]);
+assert.equal(turn(g, "left").queued, "right"); // no reversing
+g = { ...g, food: [6, 4] };
+g = step(g, fixed);
+assert.equal(g.score, 1);
+assert.equal(g.snake.length, 4);
+let wall = newGame(10, 8, fixed);
+for (let i = 0; i < 10; i++) wall = step(wall, fixed);
+assert.equal(wall.alive, false);
 
 // Terminal
 const ctx: TerminalContext = {

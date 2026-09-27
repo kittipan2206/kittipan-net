@@ -16,7 +16,7 @@ import { useOS } from "./state";
 import { useNow, useWeather } from "./hooks";
 import { bangkokTime, sunProgress, sunTimes } from "./sun";
 import { describe } from "./weather";
-import { Caps, SunArc } from "./ui";
+import { Caps, LcdText, SunArc } from "./ui";
 
 export function ClockWidget({ compact }: { compact?: boolean }) {
   const { state } = useOS();
@@ -44,14 +44,8 @@ export function ClockWidget({ compact }: { compact?: boolean }) {
           compact ? "mt-2 items-end justify-between gap-3" : "flex-col",
         )}
       >
-        <time
-          className={clsx(
-            "lcd-digits",
-            compact ? "text-[58px]" : "my-3 text-[72px]",
-          )}
-          suppressHydrationWarning
-        >
-          {now ? bangkokTime(now) : "--:--"}
+        <time className={clsx("leading-none", compact ? "text-[58px]" : "my-3 text-[72px]")} suppressHydrationWarning>
+          <LcdText text={now ? bangkokTime(now) : "--:--"} />
         </time>
         <div className={compact ? "w-[84px] shrink-0 pb-1" : ""}>
           <SunArc progress={progress} />

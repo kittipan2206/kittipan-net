@@ -5,6 +5,19 @@ Add entries under **Unreleased** as you work, then run `npm run release -- <patc
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-09-27 — "Tactile"
+
+### Added
+- Hard shadows follow the real sun: they fall one way at dawn, straight down at noon, the other way at dusk.
+- LCD realism: unlit "8" segments behind digits, pixel-row texture, backlight glow that changes with the time of day.
+- Windows power on and off like a CRT (bright line → full frame, and back).
+- Thai calendar: Songkran water drops on the glass, Loy Krathong lanterns, New Year dot-matrix fireworks, plus a greeting in the menu bar. Preview with `festival <name>` in Terminal.
+- Snake on the LCD dot grid (`play snake`, Spotlight, right-click menu, mobile grid). Keyboard, swipe or on-screen keys; high score saved.
+- Installable app (PWA): manifest, icons, offline after first visit, app shortcuts; "Install" in Settings and Spotlight.
+- Industrial cursor: exact square dot + focus-bracket reticle on a spring that wraps buttons; click bursts. Mouse only; setting to use the system cursor.
+- Springy hover on keys (lift + settle, icon nudge) and smooth scrolling.
+
+
 ## [2.1.0] - 2026-09-27
 
 ### Added

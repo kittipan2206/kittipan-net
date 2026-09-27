@@ -30,6 +30,10 @@ import { Launchpad } from "./apps/Launchpad";
 import { Projects } from "./apps/Projects";
 import { Settings } from "./apps/Settings";
 import { Terminal } from "./apps/Terminal";
+import { Snake } from "./apps/Snake";
+import { Cursor } from "./Cursor";
+import { FestivalLayer } from "./FestivalLayer";
+import { FESTIVAL_GREETING } from "./festival";
 
 const VIEWS: Record<AppId, ComponentType> = {
   about: About,
@@ -38,6 +42,7 @@ const VIEWS: Record<AppId, ComponentType> = {
   contact: Contact,
   settings: Settings,
   launchpad: Launchpad,
+  snake: Snake,
 };
 
 function AppIcon({ app, size = 22 }: { app: AppMeta; size?: number }) {
@@ -67,6 +72,7 @@ function MenuBar() {
           <span>kittipan OS</span>
         </div>
         {top && <span className="text-sub">{appById(top.id).title}</span>}
+        {state.festival && <span className="caps text-accent">{FESTIVAL_GREETING[state.festival][state.lang]}</span>}
       </div>
       <div className="flex items-center gap-2.5">
         <button
@@ -142,9 +148,9 @@ function Dock() {
   return (
     <nav
       aria-label="Dock"
-      className="absolute bottom-[18px] left-1/2 z-[90] flex -translate-x-1/2 items-end gap-2.5 rounded-xl border border-frame bg-bar px-3.5 pb-2 pt-2.5 shadow-[0_3px_0_var(--frame)] backdrop-blur-md"
+      className="absolute bottom-[18px] left-1/2 z-[90] flex -translate-x-1/2 items-end gap-2.5 rounded-xl border border-frame bg-bar px-3.5 pb-2 pt-2.5 shadow-[var(--shadow-hard)] backdrop-blur-md"
     >
-      {APPS.map((app) => {
+      {APPS.filter((a) => !a.hidden).map((app) => {
         const win = state.windows.find((w) => w.id === app.id);
         return (
           <div
@@ -203,12 +209,13 @@ function DesktopShell() {
     <div className="wallpaper fixed inset-0 hidden overflow-hidden md:block" onContextMenu={onContextMenu}>
       <div className="dots absolute inset-0" aria-hidden />
       <LiveWallpaper />
+      <FestivalLayer />
       <MenuBar />
       <nav
         aria-label="Desktop"
         className="absolute left-5 top-16 z-[5] flex w-[88px] flex-col gap-[18px]"
       >
-        {APPS.map((app) => (
+        {APPS.filter((a) => !a.hidden).map((app) => (
           <button
             key={app.id}
             type="button"
@@ -218,7 +225,7 @@ function DesktopShell() {
             }}
             className="group flex flex-col items-center gap-[7px] text-label"
           >
-            <span className="key flex size-[52px] items-center justify-center group-active:translate-y-[2px] group-active:shadow-[0_1px_0_var(--frame)]">
+            <span className="key flex size-[52px] items-center justify-center group-active:translate-y-[2px] group-active:shadow-[var(--shadow-pressed)]">
               <AppIcon app={app} />
             </span>
             <span className="font-mono text-[11px] font-medium [text-shadow:0_1px_0_rgba(0,0,0,0.15)]">
@@ -266,6 +273,7 @@ function MobileShell() {
     <div className="wallpaper fixed inset-0 overflow-hidden md:hidden">
       <div className="dots absolute inset-0" aria-hidden />
       <LiveWallpaper />
+      <FestivalLayer />
       <div
         // Pull down from the top of the home screen to open Spotlight, like iOS search.
         onTouchStart={(e) => {
@@ -288,7 +296,9 @@ function MobileShell() {
           </div>
           <MobileTopControls />
         </header>
-        <span className="caps -mb-2 -mt-2 text-center text-label opacity-60">↓ pull to search</span>
+        <span className="caps -mb-2 -mt-2 text-center text-label opacity-60">
+          {state.festival ? FESTIVAL_GREETING[state.festival][state.lang] : "↓ pull to search"}
+        </span>
         <ClockWidget compact />
         <div className="grid grid-cols-2 gap-3">
           <WeatherWidget compact />
@@ -326,7 +336,7 @@ function MobileShell() {
 
       <nav
         aria-label="Dock"
-        className="absolute inset-x-4 bottom-[max(env(safe-area-inset-bottom),20px)] flex justify-around rounded-[22px] border border-frame bg-bar p-3 shadow-[0_3px_0_var(--frame)] backdrop-blur-md"
+        className="absolute inset-x-4 bottom-[max(env(safe-area-inset-bottom),20px)] flex justify-around rounded-[22px] border border-frame bg-bar p-3 shadow-[var(--shadow-hard)] backdrop-blur-md"
       >
         {dockApps.map((a) => (
           <Key
@@ -569,6 +579,7 @@ export function OS() {
         <AnimatePresence>{state.spotlight && <Spotlight />}</AnimatePresence>
         <Toast />
         <Screensaver />
+        <Cursor />
         {state.rebooting && <Reboot />}
         <BootReveal />
       </MotionConfig>

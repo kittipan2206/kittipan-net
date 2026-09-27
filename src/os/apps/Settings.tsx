@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { sound } from "@/lib/sound";
 import {
   useOS,
+  type CursorPref,
   type Accent,
   type MotionPref,
   type Screensaver,
@@ -13,7 +14,8 @@ import {
 import { useNow } from "../hooks";
 import { bangkokTime, sunTimes } from "../sun";
 import { BUILT_AT, COMMIT, VERSION } from "../version";
-import { Caps } from "../ui";
+import { Caps, Key } from "../ui";
+import { INSTALL_MESSAGE, installApp } from "../pwa";
 
 const ACCENT_SWATCH: Record<Accent, string> = {
   orange: "#ff5500",
@@ -84,7 +86,7 @@ function Row({
 }
 
 export function Settings() {
-  const { state, setPrefs, setSound, setLang, setTheme, setMotion } = useOS();
+  const { state, setPrefs, setSound, setLang, setTheme, setMotion, notify } = useOS();
   const now = useNow(60_000);
   const times = now ? sunTimes(now) : null;
 
@@ -179,6 +181,9 @@ export function Settings() {
             onChange={(screensaver) => setPrefs({ screensaver })}
           />
         </Row>
+        <Row title="Cursor" hint="Focus-bracket cursor that springs onto keys. Mouse only.">
+          <Segmented<CursorPref> label="Cursor" value={state.cursor} options={["custom", "system"]} onChange={(cursor) => setPrefs({ cursor })} />
+        </Row>
       </section>
 
       <Caps>System</Caps>
@@ -202,6 +207,12 @@ export function Settings() {
           </div>
         ))}
       </section>
+      <Key
+        className="flex h-11 items-center justify-center gap-2 font-mono text-[13px]"
+        onClick={async () => notify(INSTALL_MESSAGE[await installApp()])}
+      >
+        Install kittipan OS as an app
+      </Key>
       <a
         href="https://github.com/kittipan2206/kittipan-net/blob/main/CHANGELOG.md"
         target="_blank"

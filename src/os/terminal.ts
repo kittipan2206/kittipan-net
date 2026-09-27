@@ -16,7 +16,8 @@ export type Effect =
   | { type: "clear" }
   | { type: "reboot" }
   | { type: "unlock" }
-  | { type: "screensaver" };
+  | { type: "screensaver" }
+  | { type: "festival"; value: "songkran" | "loykrathong" | "newyear" | "off" | "auto" };
 
 export interface TerminalContext {
   name: string;
@@ -49,6 +50,7 @@ const HELP: Line[] = [
   { text: "  sound <on|off>    keyboard clicks" },
   { text: "  date · weather    Bangkok, right now" },
   { text: "  neofetch          system info" },
+  { text: "  play snake        a game on the LCD" },
   { text: "  unlock            owner sign-in" },
   { text: "  version           build info · `changelog` for what's new" },
   { text: "  clear · reboot · screensaver · exit" },
@@ -182,6 +184,20 @@ export function runCommand(input: string, ctx: TerminalContext): Result {
         { text: "or see Settings → System", tone: "muted" },
       );
 
+    case "play":
+    case "snake":
+      if (cmd === "play" && arg !== "snake") return err("usage: play snake");
+      return fx([{ type: "open", app: "snake" }], { text: "loading snake.app…", tone: "muted" });
+
+    case "festival": {
+      const options = ["songkran", "loykrathong", "newyear", "off", "auto"] as const;
+      const value = options.find((o) => o === arg);
+      if (!value) return err("usage: festival <songkran|loykrathong|newyear|off|auto>");
+      return fx([{ type: "festival", value }], {
+        text: value === "auto" ? "festivals follow the Thai calendar again" : value === "off" ? "festivals off for this session" : `preview: ${value}`,
+      });
+    }
+
     case "screensaver":
       return fx([{ type: "screensaver" }]);
 
@@ -230,7 +246,7 @@ export function runCommand(input: string, ctx: TerminalContext): Result {
 // Tab completion: first word completes commands, the second completes that command's arguments.
 export const COMMANDS = [
   "help", "whoami", "ls", "open", "lang", "theme", "sound", "date", "weather", "neofetch",
-  "unlock", "version", "changelog", "clear", "reboot", "screensaver", "exit", "echo",
+  "unlock", "version", "changelog", "clear", "reboot", "screensaver", "exit", "echo", "play", "festival",
 ];
 
 export function complete(input: string, apps: string[]): { value: string; options: string[] } {
@@ -241,6 +257,8 @@ export function complete(input: string, apps: string[]): { value: string; option
     lang: ["th", "en"],
     theme: ["auto", "dawn", "day", "dusk", "night"],
     sound: ["on", "off"],
+    play: ["snake"],
+    festival: ["songkran", "loykrathong", "newyear", "off", "auto"],
   };
   const [pool, prefix, head] =
     parts.length <= 1
